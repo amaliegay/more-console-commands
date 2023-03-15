@@ -13,7 +13,7 @@ To get access to Lua console,
 
 ## Contact
 
-To report issues or request commands, ping me @Amalie#9522 in the Discord server [Morrowind Modding Community](https://discord.me/mwmods), or open a bug report in the Nexusmods page Bugs section, or [Github Issues section](https://github.com/JoanyMcKarelyn/more-console-commands/issues).
+To report issues or request commands, ping me @Amalie#9522 in the Discord server [Morrowind Modding Community](https://discord.me/mwmods), or open a bug report in the [Nexusmods page Bugs section](https://www.nexusmods.com/morrowind/mods/52500?tab=bugs), or [Github Issues section](https://github.com/JoanyMcKarelyn/more-console-commands/issues).
 
 ## Commands
 

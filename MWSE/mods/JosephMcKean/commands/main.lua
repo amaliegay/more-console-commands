@@ -322,8 +322,8 @@ local function registerModConfig()
 	})
 	info:createInfo({ text = "\nMore detailed documentation see Docs\\More Console Commands.md or \nNexusmods page:\n" })
 	info:createHyperlink{
-		text = "https://www.nexusmods.com/morrowind/users/3040468",
-		exec = "https://www.nexusmods.com/morrowind/users/3040468",
+		text = "https://www.nexusmods.com/morrowind/mods/52500",
+		exec = "https://www.nexusmods.com/morrowind/mods/52500",
 	}
 
 	mwse.mcm.register(template)
