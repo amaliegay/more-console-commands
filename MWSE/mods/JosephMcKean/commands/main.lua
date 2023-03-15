@@ -1,9 +1,38 @@
-local config = mwse.loadConfig("More Console Command", { marks = {} })
-local configPath = "More Console Command"
+local defaultConfig = { defaultLuaConsole = false, leftRightArrowSwitch = false, marks = {} }
+local configPath = "More Console Commands"
+local config = mwse.loadConfig(configPath, defaultConfig)
 local console = tes3ui.registerID("MenuConsole")
 
+--- @param e uiActivatedEventData
+local function onMenuConsoleActivated(e)
+	if (not e.newlyCreated) then
+		return
+	end
+
+	local menuConsole = e.element
+	local input = menuConsole:findChild("UIEXP:ConsoleInputBox")
+	local scriptToggleButton = input.parent.parent:findChild(-984).parent
+	if config.defaultLuaConsole then
+		local toggleText = scriptToggleButton.text
+		if toggleText ~= "lua" then
+			scriptToggleButton:triggerEvent("mouseClick")
+		end
+	end
+
+	input:registerBefore("keyPress", function(k)
+		if not config.leftRightArrowSwitch then
+			return
+		end
+		local key = k.data0
+		if (key == -0x7FFFFFFE) or (key == -0x7FFFFFFF) then
+			-- Pressing right or left
+			scriptToggleButton:triggerEvent("mouseClick")
+		end
+	end)
+end
+event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole", priority = -9999 })
+
 local function listMarks()
-	tes3ui.log("mark <id>: Mark the player's current cell and position for recall.")
 	if not table.empty(config.marks) then
 		tes3ui.log("\nHere is a list of marks that are available:")
 		for id, mark in pairs(config.marks) do
@@ -11,7 +40,7 @@ local function listMarks()
 		end
 	else
 		tes3ui.log(
-		"Type mark to view all marks, type mark <id> to mark. \nExample: mark home, recall home.\n<id> needs to be one single word like this or likethis or like_this.")
+		"Type mark or recall to view all marks, type mark <id> to mark, type recall <id> to recall. \nExample: mark home, recall home.\n<id> needs to be one single word like this or likethis or like_this.")
 	end
 end
 
@@ -95,22 +124,29 @@ end
 local command = {
 	-- Money cheats
 	["kaching"] = {
-		description = "Gives current reference 1,000 gold.",
+		description = "Give current reference 1,000 gold.",
 		callback = function()
 			giveGold(1000)
 		end,
 	},
 	["motherlode"] = {
-		description = "Gives current reference 50,000 gold.",
+		description = "Give current reference 50,000 gold.",
 		callback = function()
 			giveGold(50000)
 		end,
 	},
 	["money"] = {
-		description = "Sets current reference gold amount to the input value. e.g. money 420",
+		description = "Set current reference gold amount to the input value. e.g. money 420",
 		callback = function(params)
+			if not params[1] then
+				return
+			end
+			local count = tonumber(params[1])
+			if not count then
+				return
+			end
 			removeGold()
-			giveGold(tonumber(params[1]) or 0)
+			giveGold(count)
 		end,
 	},
 	-- skill module cheats
@@ -143,11 +179,14 @@ local command = {
 				config.marks[params[1]] = {
 					name = tes3.player.cell.editorName,
 					cell = cell,
-					position = tes3vector3.new(position.x, position.y, position.z),
-					orientation = tes3vector3.new(orientation.x, orientation.y, orientation.z),
+					position = { x = position.x, y = position.y, z = position.z },
+					orientation = { x = orientation.x, y = orientation.y, z = orientation.z },
 				}
 				mwse.saveConfig(configPath, config)
 				tes3ui.log("%s: %s", params[1], tes3.player.cell.editorName)
+				mwse.log("marks[%s].cell = {\nname = %s,\ncell = %s,\nposition = { %s, %s, %s },\norientation = { %s, %s, %s }\n}",
+				         params[1], tes3.player.cell.editorName, cell, position.x, position.y, position.z, orientation.x,
+				         orientation.y, orientation.z)
 			end
 		end,
 	},
@@ -159,25 +198,63 @@ local command = {
 			else
 				local mark = config.marks[params[1]]
 				if mark then
-					mwse.log("mark.cell = %s", mark.cell)
+					mwse.log("tes3.positionCell({\ncell = %s,\nposition = { %s, %s, %s },\norientation = { %s, %s, %s }\n}", mark.cell,
+					         mark.position.x, mark.position.y, mark.position.z, mark.orientation.x, mark.orientation.y,
+					         mark.orientation.z)
 					if mark.cell then
 						tes3.positionCell({
-							cell = mark.cell and tes3.getCell({ id = mark.cell }),
-							position = mark.position,
-							orientation = mark.orientation,
+							cell = tes3.getCell({ id = mark.cell }),
+							position = { mark.position.x, mark.position.y, mark.position.z },
+							orientation = { mark.orientation.x, mark.orientation.y, mark.orientation.z },
+							forceCellChange = true,
 						})
 					else
-						tes3.positionCell({ position = mark.position, orientation = mark.orientation })
+						tes3.positionCell({
+							position = { mark.position.x, mark.position.y, mark.position.z },
+							orientation = { mark.orientation.x, mark.orientation.y },
+							forceCellChange = true,
+						})
 					end
 				end
 			end
 		end,
 	},
-}
-
-local functionCommand = {
-	["kill"] = function()
-	end,
+	-- NPC command
+	["follow"] = {
+		description = "Make the current reference your follower.",
+		callback = function(params)
+			local ref = tes3ui.findMenu(console):getPropertyObject("MenuConsole_current_ref")
+			if not ref then
+				return
+			end
+			tes3.setAIFollow({ reference = ref, target = tes3.player })
+		end,
+	},
+	["kill"] = {
+		description = "Kill the current reference. For safety reason, type kill player to kill the player.",
+		callback = function(params)
+			local ref = tes3ui.findMenu(console):getPropertyObject("MenuConsole_current_ref")
+			if not params[1] and ref and ref.mobile then
+				if ref.mobile ~= tes3.mobilePlayer then
+					ref.mobile:kill()
+				else
+					tes3ui.log("For safety reason, type kill player to kill the player.")
+				end
+			elseif params[1] == "player" then
+				tes3.mobilePlayer:kill()
+			end
+		end,
+	},
+	["wander"] = {
+		description = "Make the current reference wander.",
+		callback = function(params)
+			local ref = tes3ui.findMenu(console):getPropertyObject("MenuConsole_current_ref")
+			if not ref then
+				return
+			end
+			tes3.setAIWander({ reference = ref, range = 512, idles = { 60, 20, 20, 0, 0, 0, 0, 0 } })
+		end,
+	},
 }
 
 event.register("UIEXP:consoleCommand", function(e)
@@ -198,33 +275,57 @@ event.register("UIEXP:consoleCommand", function(e)
 	e.block = true
 end)
 
---[[event.register("UIEXP:sandboxConsole", function(e)
-	e.sandbox.help = function()
-		tes3ui.log("help: Shows up available cheats.")
-		for command, data in pairs(functionCommand) do
-			tes3ui.log("%s: %s", command, data.description)
-		end
+event.register("UIEXP:consoleCommand", function(e)
+	if e.context ~= "lua" then
+		return
 	end
-end, { priority = -9999 })]]
+	local text = e.command ---@type string
+	local words = {}
+	for w in string.gmatch(text, "%S+") do
+		table.insert(words, w:lower())
+	end
+	local help = words[1]
+	if help ~= "help" then
+		return
+	end
+	tes3ui.log("help: Shows up available commands.")
+	for functionName, data in pairs(command) do
+		tes3ui.log("%s: %s", functionName, data.description)
+	end
+	e.block = true
+end, { priority = -9999 })
 
---[[local function registerModConfig()
+local function registerModConfig()
 	local template = mwse.mcm.createTemplate(configPath)
 	template:saveOnClose(configPath, config)
 
-	local page = template:createSideBarPage()
+	local page = template:createPage()
 
-	page:createYesNoButton({
-		label = "Commands for mwscript console?",
-		description = "Normally the \"Quick Load\" feature will only load the latest save made using \"Quick Save\". This feature makes loading a quick save instead load the newest save of any type.",
-		variable = mwse.mcm.createTableVariable({ id = "loadLatestSave", table = config }),
+	local settings = page:createCategory("Settings")
+	settings:createYesNoButton({
+		label = "Press left right arrow to switch between lua and mwscript console",
+		variable = mwse.mcm.createTableVariable({ id = "leftRightArrowSwitch", table = config }),
 	})
+	settings:createYesNoButton({
+		label = "Default to lua console",
+		variable = mwse.mcm.createTableVariable({ id = "defaultLuaConsole", table = config }),
+	})
+
+	local info = page:createCategory("Available Commands")
+	info:createInfo({ text = "help: Shows up available communeDeadDesc." })
+	for functionName, data in pairs(command) do
+		info:createInfo({ text = string.format("%s: %s", functionName, data.description) })
+	end
+	info:createInfo({
+		text = "\nClick on the object while console menu is open to select the current reference. If nothing is selected, current reference is default to the player. \n" ..
+		"For example, if nothing is selected, you type and enter money 420, the player will get 420 gold. But if fargoth is selected, fargoth will get the money instead.",
+	})
+	info:createInfo({ text = "\nMore detailed documentation see Docs\\More Console Commands.md or \nNexusmods page:\n" })
+	info:createHyperlink{
+		text = "https://www.nexusmods.com/morrowind/users/3040468",
+		exec = "https://www.nexusmods.com/morrowind/users/3040468",
+	}
 
 	mwse.mcm.register(template)
 end
-event.register("modConfigReady", registerModConfig)]]
-
---[[
-    check mark in West Gash -- bugged if save and reload
-    default lua console
-    arrow left right switch between lua and mwscript console
-]]
+event.register("modConfigReady", registerModConfig)
