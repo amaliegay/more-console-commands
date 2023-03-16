@@ -28,6 +28,10 @@ money
     Set current reference gold amount to the input value.
 levelup
     Increase the player's Skill Module skill by the input value.
+set
+    Set the current reference's attribute or skill current value
+speedy
+    Set the player's Speed and Athletics to 200
 mark
     Mark the player's current cell and position for recall.
 recall
@@ -36,6 +40,14 @@ follow
     Make the current reference your follower.
 kill
     Kill the current reference.
+wander
+    Make the current reference wander and stop following
+addall
+    Add all objects of the objectType type to the current reference's inventory
+addone
+    Add one objet of the objectType type to the current reference's inventory
+quit 
+    Quit Morrowind
 ```
 
 ### help - Shows up available commands.
@@ -67,9 +79,9 @@ Description: If the current reference is given, they will be given 50,000 gold. 
 ```
 Usage: money <amount>
 
-Description: If the current reference is given, they will be given the input value amount of gold. If not, the player will be given the input value amount of gold. Note that parameters don't take variables. 
+Description: If the current reference is given, the amount of gold they carry will be set to given the input value amount. If not, the amount of gold the player has will be set to given the input value amount. Note that parameters don't take variables. 
 
-Example: money 420
+Example: money 420 -- Set the gold amount to 420
 
 ```
 
@@ -85,6 +97,47 @@ Example:
 levelup -- Show a list of available skills
 levelup bushcrafting -- Increase the Ashfall Bushcrafting skill by 1
 levelup bushcrafting 10 -- Increase the Ashfall Bushcrafting skill by 10
+
+List of available Skill Module skills:
+
+bushcrafting (Ashfall)
+climbing (Mantle of Ascension)
+cooking (Morrowind Crafting)
+corpsepreparation (Necrocraft)
+crafting (Morrowind Crafting)
+fletching (Go Fletch)
+mcfletching (Morrowind Crafting)
+inscription (Demon of Knowledge)
+masonry (Morrowind Crafting)
+metalworking (Morrowind Crafting)
+mining (Morrowind Crafting)
+packrat (Packrat Skill)
+performance (Bardic Inspiration)
+sewing (Morrowind Crafting)
+smithing (Morrowind Crafting)
+staff (MWSE Staff Skill)
+survival (Ashfall)
+woodworking (Morrowind Crafting)
+```
+
+### set - Set the current reference's attribute or skill current value
+
+```
+Usage: set <attribute> <value>, set <skill> <value>
+
+Description: <skill> needs to be onesingleword like block, mediumarmor, handtohand. 
+
+Example: 
+
+set strength 200
+set axe 200
+set handtohand 200
+```
+
+### speedy - Set the player's Speed and Athletics to 200
+
+```
+Usage: help
 ```
 
 ### mark - Mark the player's current cell and position for recall.
@@ -143,4 +196,39 @@ kill player -- player dies
 Usage: wander
 
 Description: If a npc or a creature is selected as the current reference, they will wander and stop following the player. 
+```
+
+### addall - Add all objects of the objectType type to the current reference's inventory
+
+```
+Usage: addall <objectType> <count?>
+
+Description: If the count param is given, add all objects that can be carried and have no script attached of the objectType type <count> each to the current reference's inventory. If the count is not given, it is default to 1 each.
+
+Valid objectType includes: alchemy, ammunition, apparatus, armor, book, clothing, ingredient, light, lockpick, miscitem, probe, repairitem, weapon.
+
+Example:
+
+addadll ingredient 5 -- Add 5 of all ingredients in the game to the inventory of the current reference 
+addall apparatus -- Add 1 of all apparatus in the game to the inventory of the current reference 
+```
+
+### addone - Add one object of the objectType type to the current reference's inventory
+
+```
+Usage: addone <objectType>
+
+Description: Add one carriable object that (1. can be carried, 2. have no script attached, 3. is not gold) of the objectType type to the current reference's inventory
+
+Valid objectType includes: alchemy, ammunition, apparatus, armor, book, clothing, ingredient, light, lockpick, miscitem, probe, repairitem, weapon.
+
+Example:
+
+addone clothing -- Add a random clothing to the current reference's inventory
+```
+
+### quit - Quit Morrowind
+
+```
+Usage: quit
 ```
