@@ -29,7 +29,7 @@ money
 levelup
     Increase the player's Skill Module skill by the input value.
 set (v1.2, requested by Vengyre)
-    Set the current reference's attribute or skill current value
+    Set the current reference's attribute or skill base value
 speedy (v1.2, requested by Vengyre)
     Set the player's Speed and Athletics to 200
 mark
@@ -125,7 +125,7 @@ survival (Ashfall)
 woodworking (Morrowind Crafting)
 ```
 
-### set - Set the current reference's attribute or skill current value
+### set - Set the current reference's attribute or skill base value
 
 ```
 Usage: set <attribute> <value>, set <skill> <value>

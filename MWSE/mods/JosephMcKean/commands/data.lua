@@ -243,7 +243,7 @@ data.commands = {
 		end,
 	},
 	["set"] = {
-		description = "Set the current reference's attribute or skill current value.",
+		description = "Set the current reference's attribute or skill base value.",
 		arguments = {
 			{
 				index = 1,
@@ -260,7 +260,7 @@ data.commands = {
 				return
 			end
 			local name = getName(argv[1])
-			tes3.setStatistic({ reference = tes3.player, name = name, current = tonumber(argv[2]) })
+			tes3.setStatistic({ reference = tes3.player, name = name, value = tonumber(argv[2]) })
 		end,
 	},
 	["speedy"] = {
