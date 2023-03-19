@@ -58,7 +58,6 @@ local function parseArgs(fn, args)
 
 		-- parsing arguments
 		for _, argument in ipairs(data.commands[fn].arguments) do
-			mwse.log("[Commands] Matching %s command argument %s", fn, argument.metavar)
 			metavars = metavars .. argument.metavar .. " "
 			-- missing args error
 			if argument.required and not args[argument.index] then
