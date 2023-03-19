@@ -166,7 +166,7 @@ local function removeItems(params)
 		end
 	else
 		for _, stack in pairs(ref.object.inventory.items) do
-			tes3.removeItem({ reference =ref, item = stack.object, count = stack.count, playSound = false })
+			tes3.removeItem({ reference = ref, item = stack.object, count = stack.count, playSound = false })
 		end
 		tes3ui.log("%s inventory has been emptied.", ref.id)
 	end
@@ -392,7 +392,12 @@ data.commands = {
 				tes3ui.log("spawn: error: %s is not a valid object id", argv[1])
 				return
 			end
-			tes3.createReference({ object = argv[1], position = tes3.player.position, orientation = tes3.player.orientation, cell = tes3.player.cell})
+			tes3.createReference({
+				object = argv[1],
+				position = tes3.player.position,
+				orientation = tes3.player.orientation,
+				cell = tes3.player.cell,
+			})
 		end,
 	},
 	["wander"] = {

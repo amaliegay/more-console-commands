@@ -28,29 +28,35 @@ money
     Set current reference gold amount to the input value.
 levelup
     Increase the player's Skill Module skill by the input value.
-set
+set (v1.2, requested by Vengyre)
     Set the current reference's attribute or skill current value
-speedy
+speedy (v1.2, requested by Vengyre)
     Set the player's Speed and Athletics to 200
 mark
     Mark the player's current cell and position for recall.
 recall
     Teleport the player to a previous mark.
+emptyinventory
+    Empty the current reference inventory
 follow
     Make the current reference your follower.
 kill
     Kill the current reference.
+showinventory
+    Show the current reference inventory
+spawn
+    Spawn a reference with specifed id
 wander
     Make the current reference wander and stop following
-addall
+addall (v1.2, requested by VitruvianGuar)
     Add all objects of the objectType type to the current reference's inventory
 addone
     Add one objet of the objectType type to the current reference's inventory
-quit 
+qqq (v1.4, requested by Hedy and EarthApocalypto)
     Quit Morrowind
 ```
 
-### help - Shows up available commands.
+### help - Show a list of available commands.
 
 ```
 Usage: help
@@ -90,11 +96,10 @@ Example: money 420 -- Set the gold amount to 420
 ```
 Usage: levelup <skillname> <amount>
 
-Description: If no skillname is given, a list of available skills will be printed. If valid skillname is given, according skill level will increase by the input value amount. If no amount is given, the amount is default to 1. Note that parameters don't take variables. 
+Description: If valid skillname is given, according skill level will increase by the input value amount. 
 
 Example: 
 
-levelup -- Show a list of available skills
 levelup bushcrafting -- Increase the Ashfall Bushcrafting skill by 1
 levelup bushcrafting 10 -- Increase the Ashfall Bushcrafting skill by 10
 
@@ -167,6 +172,19 @@ recall -- Show a list of previous marks
 recall myhome -- Teleport the player to the previous mark myhome
 recall guild_hal -- No mark with id guild_hal found. Do nothing.
 ```
+
+### emptyinventory - Empty the current reference inventory.
+
+```
+Usage: emptyinventory player?
+
+Description: If a npc/creature/container is selected as the current reference, their inventory will be emptied. Used with caution as there is no way to recover the items lost except reloading.
+
+Example:
+
+emptyinventory -- empty current reference's inventory, except player's
+emptyinventory player -- empty player's inventory
+```
     
 ### follow - Make the current reference your follower.
 
@@ -190,6 +208,25 @@ kill -- With player selected, do nothing
 kill player -- player dies
 ```
 
+### showinventory - Show the current reference inventory.
+
+```
+Usage: showinventory
+
+Description: Take the contents from the inventory via this method does not count as stealing. Note that leveled list items are infinitely respawned. For example, if you take a steel cuirass from an Imperial Guard, they will not get half-naked but instead get another cuirass from the leveled list.
+```
+
+### spawn - Spawn a reference with specifed id.
+
+```
+Usage: spawn id
+
+Example:
+
+spawn fargoth -- spawn a new fargoth reference
+spawn femgoth -- error: invalid object id
+```
+
 ### wander - Make the current reference wander.
 
 ```
@@ -209,14 +246,14 @@ Valid objectType includes: alchemy, ammunition, apparatus, armor, book, clothing
 
 Example:
 
-addadll ingredient 5 -- Add 5 of all ingredients in the game to the inventory of the current reference 
+addall ingredient 5 -- Add 5 of all ingredients in the game to the inventory of the current reference 
 addall apparatus -- Add 1 of all apparatus in the game to the inventory of the current reference 
 ```
 
 ### addone - Add one object of the objectType type to the current reference's inventory
 
 ```
-Usage: addone <objectType>
+Usage: addone objectType count?
 
 Description: Add one carriable object that (1. can be carried, 2. have no script attached, 3. is not gold) of the objectType type to the current reference's inventory
 
@@ -225,10 +262,11 @@ Valid objectType includes: alchemy, ammunition, apparatus, armor, book, clothing
 Example:
 
 addone clothing -- Add a random clothing to the current reference's inventory
+addone ammunition 100 -- Add 100 copies of a random ammunition to the current reference's inventory
 ```
 
-### quit - Quit Morrowind
+### qqq - Quit Morrowind
 
 ```
-Usage: quit
+Usage: qqq
 ```
