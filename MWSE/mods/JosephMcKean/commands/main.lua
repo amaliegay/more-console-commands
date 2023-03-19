@@ -1,5 +1,6 @@
 local config = require("JosephMcKean.commands.config")
 local data = require("JosephMcKean.commands.data")
+
 local modName = "More Console Commands"
 
 --- @param e uiActivatedEventData
@@ -31,21 +32,82 @@ local function onMenuConsoleActivated(e)
 end
 event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole", priority = -9999 })
 
+---@param command string
+---@return string fn?
+---@return string[] args
+local function getArgs(command)
+	local args = {} ---@type string[]
+	for w in string.gmatch(command, "%S+") do
+		table.insert(args, w:lower())
+	end
+	local fn = args[1]
+	if fn then
+		table.remove(args, 1)
+	end
+	return fn, args
+end
+
+---@param fn string 
+---@param args string[]
+local function parseArgs(fn, args)
+	if data.commands[fn].arguments then
+		local errored
+		local metavars = ""
+		local invalidChoiceArgs = {} ---@type command.data.argument[]
+		local missingMetavars = ""
+
+		-- parsing arguments
+		for _, argument in ipairs(data.commands[fn].arguments) do
+			mwse.log("[Commands] Matching %s command argument %s", fn, argument.metavar)
+			metavars = metavars .. argument.metavar .. " "
+			-- missing args error
+			if argument.required and not args[argument.index] then
+				errored = true
+				missingMetavars = missingMetavars .. argument.metavar .. " "
+			end
+			-- invalid choices error
+			if argument.choices and not table.empty(argument.choices) and not table.find(argument.choices, args[argument.index]) then
+				errored = true
+				table.insert(invalidChoiceArgs, argument)
+			end
+		end
+
+		-- printing error messages
+		if errored then
+			tes3ui.log("usage: %s %s", fn, metavars) -- usage: money goldcount
+
+			-- missing args error
+			if missingMetavars ~= "" then
+				tes3ui.log("%s: error: the following arguments are required: %s", fn, missingMetavars)
+				-- money: error: the following arguments are required: goldcount	
+			end
+			-- invalid choices error
+			if not table.empty(invalidChoiceArgs) then
+				for _, invalidChoiceArg in ipairs(invalidChoiceArgs) do
+					tes3ui.log("%s: error: argument %s: invalid choice: %s (choose from %s)", fn, invalidChoiceArg.metavar,
+					           args[invalidChoiceArg.index], table.concat(invalidChoiceArg.choices, ", "))
+					-- levelup: error: argument skillname: invalid choice: block (choose from bushcrafting, survival)
+				end
+			end
+			return false
+		end
+	end
+	return true
+end
+
 event.register("UIEXP:consoleCommand", function(e)
 	if e.context ~= "lua" then
 		return
 	end
-	local text = e.command ---@type string
-	local words = {}
-	for w in string.gmatch(text, "%S+") do
-		table.insert(words, w:lower())
-	end
-	local functionName = words[1]
-	if not data.command[functionName] then
+	local command = e.command ---@type string
+	local fn, args = getArgs(command)
+	if not data.commands[fn] then
 		return
 	end
-	table.remove(words, 1)
-	data.command[functionName].callback(words)
+	local parseResult = parseArgs(fn, args)
+	if parseResult then
+		data.commands[fn].callback(args)
+	end
 	e.block = true
 end)
 
@@ -53,18 +115,14 @@ event.register("UIEXP:consoleCommand", function(e)
 	if e.context ~= "lua" then
 		return
 	end
-	local text = e.command ---@type string
-	local words = {}
-	for w in string.gmatch(text, "%S+") do
-		table.insert(words, w:lower())
-	end
-	local help = words[1]
-	if help ~= "help" then
+	local command = e.command ---@type string
+	local fn, _ = getArgs(command)
+	if fn ~= "help" then
 		return
 	end
-	tes3ui.log("help: Shows up available commands.")
-	for functionName, data in pairs(data.command) do
-		tes3ui.log("%s: %s", functionName, data.description)
+	tes3ui.log("help: Show a list of available commands.")
+	for functionName, commandData in pairs(data.commands) do
+		tes3ui.log("%s: %s", functionName, commandData.description)
 	end
 	e.block = true
 end, { priority = -9999 })
@@ -87,7 +145,7 @@ local function registerModConfig()
 
 	local info = page:createCategory("Available Commands")
 	info:createInfo({ text = "help: Shows up available communeDeadDesc." })
-	for functionName, data in pairs(data.command) do
+	for functionName, data in pairs(data.commands) do
 		info:createInfo({ text = string.format("%s: %s", functionName, data.description) })
 	end
 	info:createInfo({

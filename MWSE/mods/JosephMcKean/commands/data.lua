@@ -3,7 +3,7 @@ local console = tes3ui.registerID("MenuConsole")
 local data = {}
 local modName = "More Console Commands"
 
-local objectType = {
+data.objectType = {
 	["alchemy"] = tes3.objectType.alchemy,
 	["ammunition"] = tes3.objectType.ammunition,
 	["apparatus"] = tes3.objectType.apparatus,
@@ -19,18 +19,58 @@ local objectType = {
 	["weapon"] = tes3.objectType.weapon,
 }
 
+data.objectTypeNames = {} ---@type string[]
+for objectTypeName, _ in pairs(data.objectType) do
+	table.insert(data.objectTypeNames, objectTypeName)
+end
+
 ---@return tes3reference ref
 function data.getCurrentRef()
 	local ref = tes3ui.findMenu(console):getPropertyObject("MenuConsole_current_ref")
 	return ref
 end
 
+data.attributeSkillNames = {
+	"agility",
+	"endurance",
+	"intelligence",
+	"luck",
+	"personality",
+	"speed",
+	"strength",
+	"willpower",
+	"acrobatics",
+	"alchemy",
+	"alteration",
+	"armorer",
+	"athletics",
+	"axe",
+	"block",
+	"bluntweapon",
+	"conjuration",
+	"destruction",
+	"enchant",
+	"handtohand",
+	"heavyarmor",
+	"illusion",
+	"lightarmor",
+	"longblade",
+	"marksman",
+	"mediumarmor",
+	"mercantile",
+	"mysticism",
+	"restoration",
+	"security",
+	"shortblade",
+	"sneak",
+	"spear",
+	"speechcraft",
+	"unarmored",
+}
+
 ---@param name string
----@return string? type 
----@return number? id 
-local function getAttributeId(name)
-	local type = nil
-	local id = nil
+---@return string?
+local function getName(name)
 	local camelCased = {
 		["mediumarmor"] = "mediumArmor",
 		["heavyarmor"] = "heavyArmor",
@@ -41,14 +81,7 @@ local function getAttributeId(name)
 		["handtohand"] = "handToHand",
 	}
 	name = camelCased[name] or name
-	if tes3.attribute[name] then
-		type = "attribute"
-		id = tes3.attribute[name]
-	elseif tes3.skill[name] then
-		type = "skill"
-		id = tes3.skill[name]
-	end
-	return type, id
+	return name
 end
 
 data.skillModuleSkills = {
@@ -76,6 +109,13 @@ data.skillModuleSkills = {
 	["woodworking"] = { id = "mc_Woodworking", mod = "Morrowind Crafting", include = "Morrowind_Crafting_3.mc_common" },
 }
 
+data.skillModuleSkillNames = {} ---@type string[]
+for skillname, skillData in pairs(data.skillModuleSkills) do
+	if include(skillData.include) then
+		table.insert(data.skillModuleSkillNames, skillname)
+	end
+end
+
 local function listMarks()
 	if not table.empty(config.marks) then
 		tes3ui.log("\nHere is a list of marks that are available:")
@@ -85,19 +125,6 @@ local function listMarks()
 	else
 		tes3ui.log(
 		"Type mark or recall to view all marks, type mark <id> to mark, type recall <id> to recall. \nExample: mark home, recall home.\n<id> needs to be one single word like this or likethis or like_this.")
-	end
-end
-
-local function listAvailableSkills()
-	local skillModule = include("OtherSkills.skillModule")
-	if not skillModule then
-		return
-	end
-	tes3ui.log("Example: levelup survival 69\nHere is a list of skills that are available:")
-	for name, data in pairs(data.skillModuleSkills) do
-		if include(data.include) then
-			tes3ui.log("%s (%s)", name, data.mod)
-		end
 	end
 end
 
@@ -119,11 +146,29 @@ local function levelUp(name, value)
 	skill:levelUpSkill(value)
 end
 
-local function removeGold()
-	local ref = data.getCurrentRef() or tes3.player ---@type tes3reference
-	local count = tes3.getItemCount({ reference = ref, item = "gold_001" })
-	if ref then -- tes3.player might be nil
-		tes3.removeItem({ reference = ref, item = "gold_001", count = count })
+---@class console.removeItems.params
+---@field reference tes3reference
+---@field goldOnly boolean?
+
+---@param params console.removeItems.params
+local function removeItems(params)
+	if not params then
+		return
+	end
+	local ref = params.reference
+	if not ref then
+		return
+	end
+	if params.goldOnly then
+		local count = tes3.getItemCount({ reference = ref, item = "gold_001" })
+		if ref then -- tes3.player might be nil
+			tes3.removeItem({ reference = ref, item = "gold_001", count = count })
+		end
+	else
+		for _, stack in pairs(ref.object.inventory.items) do
+			tes3.removeItem({ reference =ref, item = stack.object, count = stack.count, playSound = false })
+		end
+		tes3ui.log("%s inventory has been emptied.", ref.id)
 	end
 end
 
@@ -138,7 +183,22 @@ local function giveGold(count)
 	end
 end
 
-data.command = {
+---@class command.data.argument
+---@field index integer
+---@field metavar string
+---@field required boolean
+---@field choices string[]?
+---@field help string
+
+---@class command.data
+---@field description string
+---@field arguments command.data.argument[]?
+---@field callback function
+
+---@class command : command.data
+
+---@type command[]
+data.commands = {
 	-- Money cheats
 	["kaching"] = {
 		description = "Give current reference 1,000 gold.",
@@ -154,50 +214,58 @@ data.command = {
 	},
 	["money"] = {
 		description = "Set current reference gold amount to the input value. e.g. money 420",
-		callback = function(params)
-			if not params[1] then
-				return
-			end
-			local count = tonumber(params[1])
+		arguments = { { index = 1, metavar = "goldcount", required = true, help = "the amount of gold to add" } },
+		callback = function(argv)
+			local ref = data.getCurrentRef() or tes3.player ---@type tes3reference
+			local count = tonumber(argv[1])
 			if not count then
 				return
 			end
-			removeGold()
+			removeItems({ reference = ref, goldOnly = true })
 			giveGold(count)
 		end,
 	},
 	-- stats cheats
 	["levelup"] = {
 		description = "Increase the player's skill by the input value. e.g. levelup bushcrafting 69, levelup survival 420",
-		callback = function(params)
-			if not params[1] then
-				listAvailableSkills()
-				return
-			elseif not params[2] then
-				levelUp(params[1], 1)
-				return
-			end
-			levelUp(params[1], tonumber(params[2]) or 0)
+		arguments = {
+			{
+				index = 1,
+				metavar = "skillname",
+				required = true,
+				choices = data.skillModuleSkillNames,
+				help = "the name of the skill to level up",
+			},
+			{ index = 2, metavar = "value", required = true, help = "the increase value" },
+		},
+		callback = function(argv)
+			levelUp(argv[1], tonumber(argv[2]) or 0)
 		end,
 	},
 	["set"] = {
 		description = "Set the current reference's attribute or skill current value.",
-		callback = function(params)
+		arguments = {
+			{
+				index = 1,
+				metavar = "name",
+				required = true,
+				choices = data.attributeSkillNames,
+				help = "the name of the attribute or skill to set",
+			},
+			{ index = 2, metavar = "value", required = true, help = "the increase value" },
+		},
+		callback = function(argv)
 			local ref = data.getCurrentRef() or tes3.player
 			if not ref then
 				return
 			end
-			local type, id = getAttributeId(params[1])
-			if type == "attribute" then
-				tes3.setStatistic({ reference = tes3.player, attribute = id, current = tonumber(params[2]) })
-			elseif type == "skill" then
-				tes3.setStatistic({ reference = tes3.player, skill = id, current = tonumber(params[2]) })
-			end
+			local name = getName(argv[1])
+			tes3.setStatistic({ reference = tes3.player, name = name, current = tonumber(argv[2]) })
 		end,
 	},
 	["speedy"] = {
 		description = "Increase the player's speed to 200, athletics to 200.",
-		callback = function(params)
+		callback = function(argv)
 			tes3.setStatistic({ reference = tes3.player, attribute = tes3.attribute.speed, current = 200 })
 			tes3.setStatistic({ reference = tes3.player, skill = tes3.skill.athletics, current = 200 })
 		end,
@@ -205,8 +273,9 @@ data.command = {
 	-- mark and recall
 	["mark"] = {
 		description = "Mark the player's current cell and position for recall. Type mark to view all marks, type mark <id> to mark. e.g. mark home",
-		callback = function(params)
-			if not params[1] then
+		arguments = { { index = 1, metavar = "id", required = false, help = "the id of the mark" } },
+		callback = function(argv)
+			if not argv[1] then
 				listMarks()
 			else
 				local cell = nil
@@ -215,31 +284,29 @@ data.command = {
 				end
 				local position = tes3.player.position
 				local orientation = tes3.player.orientation
-				config.marks[params[1]] = {
+				config.marks[argv[1]] = {
 					name = tes3.player.cell.editorName,
 					cell = cell,
 					position = { x = position.x, y = position.y, z = position.z },
 					orientation = { x = orientation.x, y = orientation.y, z = orientation.z },
 				}
 				mwse.saveConfig(modName, config)
-				tes3ui.log("%s: %s", params[1], tes3.player.cell.editorName)
+				tes3ui.log("%s: %s", argv[1], tes3.player.cell.editorName)
 				mwse.log("marks[%s].cell = {\nname = %s,\ncell = %s,\nposition = { %s, %s, %s },\norientation = { %s, %s, %s }\n}",
-				         params[1], tes3.player.cell.editorName, cell, position.x, position.y, position.z, orientation.x,
+				         argv[1], tes3.player.cell.editorName, cell, position.x, position.y, position.z, orientation.x,
 				         orientation.y, orientation.z)
 			end
 		end,
 	},
 	["recall"] = {
 		description = "Teleport the player to a previous mark. Type recall to view all marks, type recall <id> to recall. e.g. recall home",
-		callback = function(params)
-			if not params[1] then
+		arguments = { { index = 1, metavar = "id", required = false, help = "the id of the mark" } },
+		callback = function(argv)
+			if not argv[1] then
 				listMarks()
 			else
-				local mark = config.marks[params[1]]
+				local mark = config.marks[argv[1]]
 				if mark then
-					mwse.log("tes3.positionCell({\ncell = %s,\nposition = { %s, %s, %s },\norientation = { %s, %s, %s }\n}", mark.cell,
-					         mark.position.x, mark.position.y, mark.position.z, mark.orientation.x, mark.orientation.y,
-					         mark.orientation.z)
 					if mark.cell then
 						tes3.positionCell({
 							cell = tes3.getCell({ id = mark.cell }),
@@ -259,9 +326,25 @@ data.command = {
 		end,
 	},
 	-- NPC command
+	["emptyinventory"] = {
+		description = "Empty the current reference's inventory.",
+		arguments = { { index = 1, metavar = "player", required = false, help = "specified to empty player inventory" } },
+		callback = function(argv)
+			if argv[1] == "player" then
+				removeItems({ reference = tes3.player })
+				return
+			end
+			local ref = data.getCurrentRef()
+			if not ref or (ref == tes3.player) then
+				tes3ui.log("For safety reason, type emptyinventory player to empty player inventory.")
+			else
+				removeItems({ reference = ref })
+			end
+		end,
+	},
 	["follow"] = {
 		description = "Make the current reference your follower.",
-		callback = function(params)
+		callback = function(argv)
 			local ref = data.getCurrentRef()
 			if not ref then
 				return
@@ -271,23 +354,50 @@ data.command = {
 	},
 	["kill"] = {
 		description = "Kill the current reference. For safety reason, type kill player to kill the player.",
-		callback = function(params)
+		arguments = { { index = 1, metavar = "player", required = false, help = "specified to kill player" } },
+		callback = function(argv)
 			local ref = data.getCurrentRef()
-			if not params[1] and ref and ref.mobile then
+			if not argv[1] and ref and ref.mobile then
 				local actor = ref.mobile ---@cast actor tes3mobileNPC|tes3mobileCreature|tes3mobilePlayer
 				if actor ~= tes3.mobilePlayer then
 					actor:kill()
 				else
 					tes3ui.log("For safety reason, type kill player to kill the player.")
 				end
-			elseif params[1] == "player" then
+			elseif argv[1] == "player" then
 				tes3.mobilePlayer:kill()
 			end
 		end,
 	},
+	["showinventory"] = {
+		description = "Show the current reference's inventory.",
+		callback = function(argv)
+			local ref = data.getCurrentRef()
+			if not ref then
+				return
+			end
+			tes3ui.leaveMenuMode()
+			tes3ui.findMenu(console).visible = false
+			timer.delayOneFrame(function()
+				tes3.showContentsMenu({ reference = ref })
+			end)
+		end,
+	},
+	["spawn"] = {
+		description = "Spawn a reference with the specified id.",
+		arguments = { { index = 1, metavar = "id", required = true, help = "the id of the reference to spawn" } },
+		callback = function(argv)
+			local obj = tes3.getObject(argv[1])
+			if not obj then
+				tes3ui.log("spawn: error: %s is not a valid object id", argv[1])
+				return
+			end
+			tes3.createReference({ object = argv[1], position = tes3.player.position, orientation = tes3.player.orientation, cell = tes3.player.cell})
+		end,
+	},
 	["wander"] = {
 		description = "Make the current reference wander.",
-		callback = function(params)
+		callback = function(argv)
 			local ref = data.getCurrentRef()
 			if not ref then
 				return
@@ -298,21 +408,28 @@ data.command = {
 	-- item commands
 	["addall"] = {
 		description = "Add all objects of the objectType type to the current reference's inventory.",
-		callback = function(params)
+		arguments = {
+			{
+				index = 1,
+				metavar = "name",
+				required = true,
+				choices = data.objectTypeNames,
+				help = "the name of the object type to add all",
+			},
+			{ index = 2, metavar = "value", required = false, help = "the add item count" },
+		},
+		callback = function(argv)
 			local ref = data.getCurrentRef() or tes3.player
 			if not ref then
 				return
 			end
-			local filter = objectType[params[1]]
-			if not filter then
-				return
-			end
-			local count = tonumber(params[2])
+			local count = tonumber(argv[2])
 			if not count then
 				count = 1
 			elseif count <= 0 then
 				return
 			end
+			local filter = data.objectType[argv[1]]
 			---@param object tes3object|tes3light
 			for object in tes3.iterateObjects(filter) do
 				if (object.name ~= "") and not object.script then
@@ -329,13 +446,26 @@ data.command = {
 	},
 	["addone"] = {
 		description = "Add one object of the objectType type to the current reference's inventory.",
-		callback = function(params)
+		arguments = {
+			{
+				index = 1,
+				metavar = "name",
+				required = true,
+				choices = data.objectTypeNames,
+				help = "the name of the object type to add one",
+			},
+			{ index = 2, metavar = "value", required = false, help = "the add item count" },
+		},
+		callback = function(argv)
 			local ref = data.getCurrentRef() or tes3.player
 			if not ref then
 				return
 			end
-			local filter = objectType[params[1]]
-			if not filter then
+			local filter = data.objectType[argv[1]]
+			local count = tonumber(argv[2])
+			if not count then
+				count = 1
+			elseif count <= 0 then
 				return
 			end
 			---@param object tes3object|tes3light
@@ -343,7 +473,7 @@ data.command = {
 				if (object.name ~= "") and not object.script then
 					if filter == tes3.objectType.light then
 						if object.canCarry then
-							tes3.addItem({ reference = ref, item = object.id, count = 1, playSound = false })
+							tes3.addItem({ reference = ref, item = object.id, count = count, playSound = false })
 							return
 						end
 					else
@@ -360,7 +490,7 @@ data.command = {
 							return goldList[id]
 						end
 						if not isGold(object.id:lower()) then
-							tes3.addItem({ reference = ref, item = object.id, count = 1, playSound = false })
+							tes3.addItem({ reference = ref, item = object.id, count = count, playSound = false })
 							return
 						end
 					end
@@ -368,9 +498,9 @@ data.command = {
 			end
 		end,
 	},
-	["quit"] = {
+	["qqq"] = {
 		description = "Quit Morrowind.",
-		callback = function(params)
+		callback = function(argv)
 			os.exit()
 		end,
 	},
