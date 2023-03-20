@@ -28,8 +28,10 @@ money
     Set current reference gold amount to the input value.
 levelup
     Increase the player's Skill Module skill by the input value.
-set (v1.2, requested by Vengyre)
-    Set the current reference's attribute or skill base value
+max (v1.7, requested by iszlev)
+    Set the current reference's ALL health/magicka/fatigue/attribute/skill base value to the input value
+set (v1.7, requested by Vengyre and iszlev)
+    Set the current reference's health/magicka/fatigue/attribute/skill base value to the input value
 speedy (v1.2, requested by Vengyre)
     Set the player's Speed and Athletics to 200
 mark
@@ -94,13 +96,12 @@ Example: money 420 -- Set the gold amount to 420
 ### levelup - Increase the player's Skill Module skill by the input value.
 
 ```
-Usage: levelup <skillname> <amount>
+Usage: levelup skillname amount
 
 Description: If valid skillname is given, according skill level will increase by the input value amount. 
 
 Example: 
 
-levelup bushcrafting -- Increase the Ashfall Bushcrafting skill by 1
 levelup bushcrafting 10 -- Increase the Ashfall Bushcrafting skill by 10
 
 List of available Skill Module skills:
@@ -125,17 +126,28 @@ survival (Ashfall)
 woodworking (Morrowind Crafting)
 ```
 
-### set - Set the current reference's attribute or skill base value
+### max - Set the current reference's ALL attributes and skills base value to the input value
 
 ```
-Usage: set <attribute> <value>, set <skill> <value>
-
-Description: <skill> needs to be onesingleword like block, mediumarmor, handtohand. 
+Usage: max value?
 
 Example: 
 
-set strength 200
-set axe 200
+max -- set all attributes all skills to 200
+max 999 -- set all attributes all skills to 999
+```
+
+### set - Set the current reference's health/magicka/fatigue/attribute/skill base value to the input value
+
+```
+Usage: set health value, set magicka value, set fatigue value, set attribute value, set skill value
+
+Description: skill needs to be onesingleword like block, mediumarmor, handtohand. 
+
+Example: 
+
+set health 200
+set luck 200
 set handtohand 200
 ```
 

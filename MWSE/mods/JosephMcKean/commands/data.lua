@@ -30,7 +30,7 @@ function data.getCurrentRef()
 	return ref
 end
 
-data.attributeSkillNames = {
+data.setNames = {
 	"agility",
 	"endurance",
 	"intelligence",
@@ -66,6 +66,9 @@ data.attributeSkillNames = {
 	"spear",
 	"speechcraft",
 	"unarmored",
+	"health",
+	"magicka",
+	"fatigue",
 }
 
 ---@param name string
@@ -242,6 +245,20 @@ data.commands = {
 			levelUp(argv[1], tonumber(argv[2]) or 0)
 		end,
 	},
+	["max"] = {
+		description = "Set the current reference's all attributes and skills base value to the input value.",
+		arguments = { { index = 1, metavar = "value", required = false, help = "the value to set" } },
+		callback = function(argv)
+			local ref = data.getCurrentRef() or tes3.player
+			if not ref then
+				return
+			end
+			local value = tonumber(argv[1]) or 200
+			for _, name in ipairs(data.setNames) do
+				tes3.setStatistic({ reference = tes3.player, name = getName(name), value = value })
+			end
+		end,
+	},
 	["set"] = {
 		description = "Set the current reference's attribute or skill base value.",
 		arguments = {
@@ -249,10 +266,10 @@ data.commands = {
 				index = 1,
 				metavar = "name",
 				required = true,
-				choices = data.attributeSkillNames,
+				choices = data.setNames,
 				help = "the name of the attribute or skill to set",
 			},
-			{ index = 2, metavar = "value", required = true, help = "the increase value" },
+			{ index = 2, metavar = "value", required = true, help = "the value to set" },
 		},
 		callback = function(argv)
 			local ref = data.getCurrentRef() or tes3.player
@@ -266,8 +283,8 @@ data.commands = {
 	["speedy"] = {
 		description = "Increase the player's speed to 200, athletics to 200.",
 		callback = function(argv)
-			tes3.setStatistic({ reference = tes3.player, attribute = tes3.attribute.speed, current = 200 })
-			tes3.setStatistic({ reference = tes3.player, skill = tes3.skill.athletics, current = 200 })
+			tes3.setStatistic({ reference = tes3.player, attribute = tes3.attribute.speed, value = 200 })
+			tes3.setStatistic({ reference = tes3.player, skill = tes3.skill.athletics, value = 200 })
 		end,
 	},
 	-- mark and recall
