@@ -26,12 +26,16 @@ motherlode
     Give current reference 50,000 gold.
 money
     Set current reference gold amount to the input value.
+cure (v1.8)
+    Cure current reference of disease, blight, poison, and restore attributes and skills
 levelup
     Increase the player's Skill Module skill by the input value.
 max (v1.7, requested by iszlev)
     Set the current reference's ALL health/magicka/fatigue/attribute/skill base value to the input value
 set (v1.7, requested by Vengyre and iszlev)
     Set the current reference's health/magicka/fatigue/attribute/skill base value to the input value
+skills (v1.8)
+    Print the current reference's skills
 speedy (v1.2, requested by Vengyre)
     Set the player's Speed and Athletics to 200
 mark
@@ -93,6 +97,13 @@ Example: money 420 -- Set the gold amount to 420
 
 ```
 
+### cure - Cure current reference of disease, blight, poison, and restore attributes and skills
+
+```
+Usage: cure
+
+```
+
 ### levelup - Increase the player's Skill Module skill by the input value.
 
 ```
@@ -149,6 +160,12 @@ Example:
 set health 200
 set luck 200
 set handtohand 200
+```
+
+### skills - Print the current reference's skills' current value
+
+```
+Usage: skills
 ```
 
 ### speedy - Set the player's Speed and Athletics to 200

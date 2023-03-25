@@ -186,6 +186,21 @@ local function giveGold(count)
 	end
 end
 
+---@param npc tes3mobileNPC
+---@return table
+function data.getSkillsDesc(npc)
+	local skills = {}
+	---@param index integer
+	---@param value integer
+	for index, value in ipairs(npc.skills) do -- index = skillId + 1
+		table.insert(skills, { index = index, value = value.current })
+	end
+	table.sort(skills, function(a, b)
+		return a.value > b.value
+	end)
+	return skills
+end
+
 ---@class command.data.argument
 ---@field index integer
 ---@field metavar string
@@ -229,6 +244,33 @@ data.commands = {
 		end,
 	},
 	-- stats cheats
+	["cure"] = {
+		description = "Cure current reference of disease, blight, poison, and restore attributes and skills",
+		callback = function(argv)
+			local cureCommon = tes3.getObject("Cure Common Disease Other") ---@cast cureCommon tes3spell
+			local cureBlight = tes3.getObject("Cure Blight Disease") ---@cast cureBlight tes3spell
+			local curePoison = tes3.getObject("Cure Poison Touch") ---@cast curePoison tes3spell
+			local restoreAttribute = tes3.getObject("Almsivi Restoration") ---@cast restoreAttribute tes3spell
+			local restoreSkillsFighter = tes3.getObject("Almsivi Restore Fighter") ---@cast restoreSkillsFighter tes3spell
+			local restoreSkillsMage = tes3.getObject("Almsivi Restore Mage") ---@cast restoreSkillsMage tes3spell
+			local restoreSkillsThief = tes3.getObject("Almsivi Restore Stealth") ---@cast restoreSkillsThief tes3spell
+			local restoreSkillsOther = tes3.getObject("Almsivi Restore Other") ---@cast restoreSkillsOther tes3spell
+			local ref = data.getCurrentRef() or tes3.player ---@type tes3reference
+			if ref.mobile.isDiseased then
+				tes3.applyMagicSource({ reference = ref, source = cureCommon, castChance = 100, bypassResistances = true })
+				tes3.applyMagicSource({ reference = ref, source = cureBlight, castChance = 100, bypassResistances = true })
+			end
+			if tes3.isAffectedBy({ reference = ref, effect = tes3.effect.poison }) then
+				tes3.applyMagicSource({ reference = ref, source = curePoison, castChance = 100, bypassResistances = true })
+			end
+			tes3.applyMagicSource({ reference = ref, source = restoreAttribute, castChance = 100, bypassResistances = true })
+			-- Restore Skills
+			tes3.applyMagicSource({ reference = ref, source = restoreSkillsFighter, castChance = 100, bypassResistances = true })
+			tes3.applyMagicSource({ reference = ref, source = restoreSkillsMage, castChance = 100, bypassResistances = true })
+			tes3.applyMagicSource({ reference = ref, source = restoreSkillsThief, castChance = 100, bypassResistances = true })
+			tes3.applyMagicSource({ reference = ref, source = restoreSkillsOther, castChance = 100, bypassResistances = true })
+		end,
+	},
 	["levelup"] = {
 		description = "Increase the player's skill by the input value. e.g. levelup bushcrafting 69, levelup survival 420",
 		arguments = {
@@ -277,7 +319,26 @@ data.commands = {
 				return
 			end
 			local name = getName(argv[1])
-			tes3.setStatistic({ reference = tes3.player, name = name, value = tonumber(argv[2]) })
+			tes3.setStatistic({ reference = ref, name = name, value = tonumber(argv[2]) })
+		end,
+	},
+	["skills"] = {
+		description = "Print the current reference's skills.",
+		callback = function(argv)
+			local ref = data.getCurrentRef()
+			if not ref then
+				tes3ui.log("skills: error: currentRef not found")
+				return
+			end
+			local npc = ref.mobile
+			if not npc then
+				return
+			end
+			---@cast npc tes3mobileNPC
+			tes3ui.log("%s skills:", npc.reference.object.name)
+			for _, skill in ipairs(data.getSkillsDesc(npc)) do
+				tes3ui.log("%s %s", tes3.skillName[skill.index - 1], skill.value)
+			end
 		end,
 	},
 	["speedy"] = {
@@ -520,6 +581,7 @@ data.commands = {
 			end
 		end,
 	},
+	--- util
 	["qqq"] = {
 		description = "Quit Morrowind.",
 		callback = function(argv)
