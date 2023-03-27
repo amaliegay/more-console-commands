@@ -58,6 +58,8 @@ addall (v1.2, requested by VitruvianGuar)
     Add all objects of the objectType type to the current reference's inventory
 addone
     Add one objet of the objectType type to the current reference's inventory
+setownership (v1.9, requested by Markel)
+    Set ownership of the current reference to none, or the specified NPC or faction with specified base ID
 qqq (v1.4, requested by Hedy and EarthApocalypto)
     Quit Morrowind
 ```
@@ -292,6 +294,18 @@ Example:
 
 addone clothing -- Add a random clothing to the current reference's inventory
 addone ammunition 100 -- Add 100 copies of a random ammunition to the current reference's inventory
+```
+
+### setownership - Set ownership of the current reference to none, or the specified NPC or faction with specified base ID
+
+```
+Usage: setownership id?
+
+Example:
+
+setownership -- Clear current reference ownership
+setownership fargoth -- Set current reference ownership to Fargoth
+setownership mages guild -- Set current reference ownership to Mages Guild
 ```
 
 ### qqq - Quit Morrowind

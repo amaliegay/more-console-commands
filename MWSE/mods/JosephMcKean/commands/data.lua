@@ -581,7 +581,37 @@ data.commands = {
 			end
 		end,
 	},
+	["setownership"] = {
+		description = "Set ownership of the current reference to none, or the specified NPC or faction with specified base ID.",
+		arguments = {
+			{ index = 1, metavar = "id", required = false, help = "the base id of the npc or faction to set ownership" },
+		},
+		---@param argv string[]?
+		callback = function(argv)
+			local ref = data.getCurrentRef()
+			if not ref then
+				return
+			end
+			local owner = argv and table.concat(argv, " ") or nil
+			if not owner then
+				tes3.setOwner({ reference = ref, remove = true })
+			elseif tes3.getFaction(owner) then
+				tes3.setOwner({ reference = ref, owner = tes3.getFaction(owner) })
+			elseif owner then
+				tes3.setOwner({ reference = ref, owner = owner })
+			end
+		end,
+	},
 	--- util
+	["cls"] = {
+		description = "Clear console.",
+		callback = function(argv)
+			if (not console) then
+				return
+			end
+			console:findChild("MenuConsole_scroll_pane"):findChild("PartScrollPane_pane"):destroyChildren()
+		end,
+	},
 	["qqq"] = {
 		description = "Quit Morrowind.",
 		callback = function(argv)
