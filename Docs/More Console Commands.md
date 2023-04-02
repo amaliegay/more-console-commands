@@ -48,6 +48,8 @@ follow
     Make the current reference your follower.
 kill
     Kill the current reference.
+resurrect
+    Resurrect the current reference and keep the inventory. 
 showinventory
     Show the current reference inventory
 spawn
@@ -237,6 +239,12 @@ Example:
 kill -- With a npc other than the player selected, the npc dies
 kill -- With player selected, do nothing
 kill player -- player dies
+```
+
+### resurrect - Resurrect the current reference and keep the inventory.
+
+```
+Usage: resurrect
 ```
 
 ### showinventory - Show the current reference inventory.
