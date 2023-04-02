@@ -2,18 +2,15 @@
 name = "More Console Commands"
 description = "a collection of commonly used console commands via UI Expansion Lua console for Morrowind."
 homepage = "https://www.nexusmods.com/morrowind/mods/52500"
-repository = "https://github.com/JoanyMcKarelyn/more-console-commands"
+repository = "https://github.com/amaliegay/more-console-commands"
 authors = [ "JosephMcKean",]
-version = "1.9"
+version = "1.10"
 
 [dependencies]
 assets = [ "MWSE/mods/JosephMcKean/commands",]
 
-[tools.mwse]
-lua-mod = "JosephMcKean.moreConsoleCommands"
-
 [dependencies.mwse]
-buildnumber = 3107
+buildnumber = 3147
 
 [dependencies.mods."UI Expansion"]
 mwse-module = "UI Expansion"
