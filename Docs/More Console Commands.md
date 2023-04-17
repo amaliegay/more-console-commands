@@ -38,8 +38,12 @@ skills (v1.8)
     Print the current reference's skills
 speedy (v1.2, requested by Vengyre)
     Set the player's Speed and Athletics to 200
+fly (v1.11)
+    Toggle levitation.
 mark
     Mark the player's current cell and position for recall.
+position (v1.11)
+    Teleport the player to a npc with specified id
 recall
     Teleport the player to a previous mark.
 emptyinventory
@@ -60,6 +64,8 @@ addall (v1.2, requested by VitruvianGuar)
     Add all objects of the objectType type to the current reference's inventory
 addone
     Add one objet of the objectType type to the current reference's inventory
+weather (v1.11)
+    Change the current weather immediately.
 setownership (v1.9, requested by Markel)
     Set ownership of the current reference to none, or the specified NPC or faction with specified base ID
 qqq (v1.4, requested by Hedy and EarthApocalypto)
@@ -178,6 +184,12 @@ Usage: skills
 Usage: help
 ```
 
+### fly - Toggle levitation
+
+```
+Usage: fly
+```
+
 ### mark - Mark the player's current cell and position for recall.
 
 ```
@@ -190,6 +202,16 @@ Example:
 mark -- Show a list of previous marks
 mark myhome -- Mark the current cell and position as myhome
 mark guild_hall -- Mark the current cell and position as guild_hall
+```
+
+### position - Teleport the player to a npc with specified id.
+
+```
+Usage: position <id>
+
+Example: 
+
+position caius cosades -- Teleport the player to NPC Caius Cosades
 ```
 
 ### recall - Teleport the player to a previous mark.
@@ -314,6 +336,24 @@ Example:
 setownership -- Clear current reference ownership
 setownership fargoth -- Set current reference ownership to Fargoth
 setownership mages guild -- Set current reference ownership to Mages Guild
+```
+
+### weather - Change the current weather immediately to the specified weather
+
+```
+Usage: weather <weatherId>
+
+Example:
+
+weather clear -- Switch the weather immediately to clear/sunny weather
+weather rain -- Switch the weather immediately to rainy weather
+weather blight -- Switch the weather immediately to blight weather
+```
+
+### cls - Clear console
+
+```
+Usage: cls
 ```
 
 ### qqq - Quit Morrowind
