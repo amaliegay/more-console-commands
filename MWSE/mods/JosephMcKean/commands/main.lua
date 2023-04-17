@@ -11,6 +11,9 @@ local function onMenuConsoleActivated(e)
 
 	local menuConsole = e.element
 	local input = menuConsole:findChild("UIEXP:ConsoleInputBox")
+	if not input then
+		return
+	end
 	local scriptToggleButton = input.parent.parent:findChild(-984).parent
 	if config.defaultLuaConsole then
 		local toggleText = scriptToggleButton.text

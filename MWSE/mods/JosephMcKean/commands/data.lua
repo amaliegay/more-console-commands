@@ -1,4 +1,7 @@
 local config = require("JosephMcKean.commands.config")
+
+local log = require("logging.logger").new({ name = "More Console Commands", logLevel = config.logLevel })
+
 local console = tes3ui.registerID("MenuConsole")
 local data = {}
 local modName = "More Console Commands"
@@ -100,11 +103,8 @@ data.skillModuleSkills = {
 	["metalworking"] = { id = "mc_Metalworking", mod = "Morrowind Crafting", include = "Morrowind_Crafting_3.mc_common" },
 	["mining"] = { id = "mc_Mining", mod = "Morrowind Crafting", include = "Morrowind_Crafting_3.mc_common" },
 	["packrat"] = { id = "Packrat", mod = "Packrat Skill", include = "gool.packrat.main" },
-	["performance"] = {
-		id = "BardicInspiration:Performance",
-		mod = "Bardic Inspiration",
-		include = "mer.bardicInspiration.controllers.skillController",
-	},
+	["painting"] = { id = "painting", mod = "Joy of Painting", include = "mer.joyOfPainting.eventHandlers.InitSkills" },
+	["performance"] = { id = "BardicInspiration:Performance", mod = "Bardic Inspiration", include = "mer.bardicInspiration.controllers.skillController" },
 	["sewing"] = { id = "mc_Sewing", mod = "Morrowind Crafting", include = "Morrowind_Crafting_3.mc_common" },
 	["smithing"] = { id = "mc_Smithing", mod = "Morrowind Crafting", include = "Morrowind_Crafting_3.mc_common" },
 	["staff"] = { id = "MSS:Staff", mod = "MWSE Staff Skill", include = "inpv.Staff Skill.main" },
@@ -162,6 +162,10 @@ local function removeItems(params)
 	if not ref then
 		return
 	end
+	if not ref.object.inventory then
+		tes3ui.log("Invalid current reference provided: reference does not have an inventory.")
+		return
+	end
 	if params.goldOnly then
 		local count = tes3.getItemCount({ reference = ref, item = "gold_001" })
 		if ref then -- tes3.player might be nil
@@ -200,6 +204,8 @@ function data.getSkillsDesc(npc)
 	end)
 	return skills
 end
+
+data.weather = { "clear", "cloudy", "foggy", "overcast", "rain", "thunder", "ash", "blight", "snow", "blizzard" }
 
 ---@class command.data.argument
 ---@field index integer
@@ -274,13 +280,7 @@ data.commands = {
 	["levelup"] = {
 		description = "Increase the player's skill by the input value. e.g. levelup bushcrafting 69, levelup survival 420",
 		arguments = {
-			{
-				index = 1,
-				metavar = "skillname",
-				required = true,
-				choices = data.skillModuleSkillNames,
-				help = "the name of the skill to level up",
-			},
+			{ index = 1, metavar = "skillname", required = true, choices = data.skillModuleSkillNames, help = "the name of the skill to level up" },
 			{ index = 2, metavar = "value", required = true, help = "the increase value" },
 		},
 		callback = function(argv)
@@ -304,13 +304,7 @@ data.commands = {
 	["set"] = {
 		description = "Set the current reference's attribute or skill base value.",
 		arguments = {
-			{
-				index = 1,
-				metavar = "name",
-				required = true,
-				choices = data.setNames,
-				help = "the name of the attribute or skill to set",
-			},
+			{ index = 1, metavar = "name", required = true, choices = data.setNames, help = "the name of the attribute or skill to set" },
 			{ index = 2, metavar = "value", required = true, help = "the value to set" },
 		},
 		callback = function(argv)
@@ -348,7 +342,14 @@ data.commands = {
 			tes3.setStatistic({ reference = tes3.player, skill = tes3.skill.athletics, value = 200 })
 		end,
 	},
-	-- mark and recall
+	-- teleportation and movements
+	["fly"] = {
+		description = "Toggle levitate",
+		callback = function(argv)
+			tes3.mobilePlayer.isFlying = not tes3.mobilePlayer.isFlying
+			tes3ui.log("Levitate -> %s", tes3.mobilePlayer.isFlying and "On" or "Off")
+		end,
+	},
 	["mark"] = {
 		description = "Mark the player's current cell and position for recall. Type mark to view all marks, type mark <id> to mark. e.g. mark home",
 		arguments = { { index = 1, metavar = "id", required = false, help = "the id of the mark" } },
@@ -370,9 +371,26 @@ data.commands = {
 				}
 				mwse.saveConfig(modName, config)
 				tes3ui.log("%s: %s", argv[1], tes3.player.cell.editorName)
-				mwse.log("marks[%s].cell = {\nname = %s,\ncell = %s,\nposition = { %s, %s, %s },\norientation = { %s, %s, %s }\n}",
-				         argv[1], tes3.player.cell.editorName, cell, position.x, position.y, position.z, orientation.x,
-				         orientation.y, orientation.z)
+				mwse.log("marks[%s].cell = {\nname = %s,\ncell = %s,\nposition = { %s, %s, %s },\norientation = { %s, %s, %s }\n}", argv[1], tes3.player.cell.editorName,
+				         cell, position.x, position.y, position.z, orientation.x, orientation.y, orientation.z)
+			end
+		end,
+	},
+	["position"] = {
+		description = "Teleport the player to a npc with specified id",
+		arguments = { { index = 1, metavar = "id", required = true, help = "the id of the npc to teleport to" } },
+		callback = function(argv)
+			local refId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
+			log:debug("Positioning refId %s", refId)
+			if refId then
+				local ref = tes3.getReference(refId)
+				if ref and ref.baseObject.objectType == tes3.objectType.npc then
+					tes3.positionCell({
+						cell = ref.cell,
+						position = { ref.position.x - 64, ref.position.y + 64, ref.position.z },
+						orientation = { ref.orientation.x, ref.orientation.y, ref.orientation.z + math.pi },
+					})
+				end
 			end
 		end,
 	},
@@ -480,12 +498,7 @@ data.commands = {
 				tes3ui.log("spawn: error: %s is not a valid object id", argv[1])
 				return
 			end
-			tes3.createReference({
-				object = argv[1],
-				position = tes3.player.position,
-				orientation = tes3.player.orientation,
-				cell = tes3.player.cell,
-			})
+			tes3.createReference({ object = argv[1], position = tes3.player.position, orientation = tes3.player.orientation, cell = tes3.player.cell })
 		end,
 	},
 	["wander"] = {
@@ -502,13 +515,7 @@ data.commands = {
 	["addall"] = {
 		description = "Add all objects of the objectType type to the current reference's inventory.",
 		arguments = {
-			{
-				index = 1,
-				metavar = "name",
-				required = true,
-				choices = data.objectTypeNames,
-				help = "the name of the object type to add all",
-			},
+			{ index = 1, metavar = "name", required = true, choices = data.objectTypeNames, help = "the name of the object type to add all" },
 			{ index = 2, metavar = "value", required = false, help = "the add item count" },
 		},
 		callback = function(argv)
@@ -540,13 +547,7 @@ data.commands = {
 	["addone"] = {
 		description = "Add one object of the objectType type to the current reference's inventory.",
 		arguments = {
-			{
-				index = 1,
-				metavar = "name",
-				required = true,
-				choices = data.objectTypeNames,
-				help = "the name of the object type to add one",
-			},
+			{ index = 1, metavar = "name", required = true, choices = data.objectTypeNames, help = "the name of the object type to add one" },
 			{ index = 2, metavar = "value", required = false, help = "the add item count" },
 		},
 		callback = function(argv)
@@ -593,9 +594,7 @@ data.commands = {
 	},
 	["setownership"] = {
 		description = "Set ownership of the current reference to none, or the specified NPC or faction with specified base ID.",
-		arguments = {
-			{ index = 1, metavar = "id", required = false, help = "the base id of the npc or faction to set ownership" },
-		},
+		arguments = { { index = 1, metavar = "id", required = false, help = "the base id of the npc or faction to set ownership" } },
 		---@param argv string[]?
 		callback = function(argv)
 			local ref = data.getCurrentRef()
@@ -621,6 +620,19 @@ data.commands = {
 			else
 				tes3ui.log("usage: setownership id?")
 				tes3ui.log("setownership: error: argument id: invalid input.")
+			end
+		end,
+	},
+	--- world cheats
+	["weather"] = {
+		description = "Set current weather.",
+		arguments = { { index = 1, metavar = "weather", required = true, choices = data.weather, help = "the name of the weather" } },
+		callback = function(argv)
+			local weatherController = tes3.worldController.weatherController
+			local weather = tes3.weather[argv[1]] ---@type number?
+			if weather then
+				weatherController:switchImmediate(weather)
+				weatherController:updateVisuals()
 			end
 		end,
 	},
