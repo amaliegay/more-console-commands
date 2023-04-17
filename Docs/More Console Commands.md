@@ -64,10 +64,12 @@ addall (v1.2, requested by VitruvianGuar)
     Add all objects of the objectType type to the current reference's inventory
 addone
     Add one objet of the objectType type to the current reference's inventory
-weather (v1.11)
-    Change the current weather immediately.
 setownership (v1.9, requested by Markel)
     Set ownership of the current reference to none, or the specified NPC or faction with specified base ID
+weather (v1.11)
+    Change the current weather immediately.
+cls (v1.9)
+    Clear console
 qqq (v1.4, requested by Hedy and EarthApocalypto)
     Quit Morrowind
 ```
@@ -342,7 +344,7 @@ setownership mages guild -- Set current reference ownership to Mages Guild
 ### weather - Change the current weather immediately to the specified weather
 
 ```
-Usage: weather <weatherId>
+Usage: weather weatherId
 
 Example:
 
