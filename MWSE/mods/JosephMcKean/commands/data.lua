@@ -207,6 +207,18 @@ end
 
 data.weather = { "clear", "cloudy", "foggy", "overcast", "rain", "thunder", "ash", "blight", "snow", "blizzard" }
 
+local function calm()
+	for _, cell in pairs(tes3.getActiveCells()) do
+		for ref in cell:iterateReferences({ tes3.objectType.creature, tes3.objectType.npc }) do
+			local mobile = ref.mobile ---@cast mobile tes3mobileCreature|tes3mobileNPC
+			mobile.fight = 0
+			if mobile.inCombat then
+				mobile:stopCombat(true)
+			end
+		end
+	end
+end
+
 ---@class command.data.argument
 ---@field index integer
 ---@field metavar string
@@ -463,6 +475,13 @@ data.commands = {
 			elseif argv[1] == "player" then
 				tes3.mobilePlayer:kill()
 			end
+		end,
+	},
+	["peace"] = {
+		description = "Pacify all enemies. Irreversible.",
+		callback = function(argv)
+			calm()
+			event.register("cellChanged", calm)
 		end,
 	},
 	["resurrect"] = {

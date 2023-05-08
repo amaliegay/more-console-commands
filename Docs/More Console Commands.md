@@ -52,6 +52,8 @@ follow
     Make the current reference your follower.
 kill
     Kill the current reference.
+peace (v1.12)
+    Pacify all the enemies. Irreversible.
 resurrect
     Resurrect the current reference and keep the inventory. 
 showinventory
@@ -264,6 +266,12 @@ Example:
 kill -- With a npc other than the player selected, the npc dies
 kill -- With player selected, do nothing
 kill player -- player dies
+```
+
+### peace - Pacify all the enemies. Irreversible.
+
+```
+Usage: peace
 ```
 
 ### resurrect - Resurrect the current reference and keep the inventory.
