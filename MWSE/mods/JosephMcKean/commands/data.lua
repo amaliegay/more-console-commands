@@ -1,6 +1,6 @@
 local config = require("JosephMcKean.commands.config")
 
-local log = require("logging.logger").new({ name = "More Console Commands", logLevel = config.logLevel })
+local log = require("logging.logger").new({ name = "More Console Commands - data", logLevel = config.logLevel })
 
 local console = tes3ui.registerID("MenuConsole")
 local data = {}
@@ -221,29 +221,45 @@ end
 
 ---@class command.data.argument
 ---@field index integer
+---@field containsSpaces boolean? If the parameter can contain spaces. Only available for the first parameter
 ---@field metavar string
 ---@field required boolean
 ---@field choices string[]?
 ---@field help string
 
 ---@class command.data
----@field description string
+---@field name string The name of the command
+---@field description string The description of the command
 ---@field arguments command.data.argument[]?
----@field callback function
+---@field callback fun(argv:string[]) The callback function
+---@field aliases string[]?
+---@field caseSensitive boolean? If the arguments are case sensitive
 
 ---@class command : command.data
+local command = {
+	schema = {
+		name = "Command",
+		fields = {
+			description = { type = "string", required = true },
+			aliases = { type = "table", required = false },
+			arguments = { type = "table", required = false },
+			callback = { type = "function", required = true },
+			caseSensitive = { type = "boolean", required = false },
+		},
+	},
+}
 
----@type command[]
+---@type table<string, command>
 data.commands = {
 	-- Money cheats
 	["kaching"] = {
-		description = "Give current reference 1,000 gold.",
+		description = "Give current reference 1,000 gold",
 		callback = function()
 			giveGold(1000)
 		end,
 	},
 	["motherlode"] = {
-		description = "Give current reference 50,000 gold.",
+		description = "Give current reference 50,000 gold",
 		callback = function()
 			giveGold(50000)
 		end,
@@ -300,7 +316,7 @@ data.commands = {
 		end,
 	},
 	["max"] = {
-		description = "Set the current reference's all attributes and skills base value to the input value.",
+		description = "Set the current reference's all attributes and skills base value to the input value",
 		arguments = { { index = 1, metavar = "value", required = false, help = "the value to set" } },
 		callback = function(argv)
 			local ref = data.getCurrentRef() or tes3.player
@@ -314,7 +330,7 @@ data.commands = {
 		end,
 	},
 	["set"] = {
-		description = "Set the current reference's attribute or skill base value.",
+		description = "Set the current reference's attribute or skill base value",
 		arguments = {
 			{ index = 1, metavar = "name", required = true, choices = data.setNames, help = "the name of the attribute or skill to set" },
 			{ index = 2, metavar = "value", required = true, help = "the value to set" },
@@ -329,7 +345,7 @@ data.commands = {
 		end,
 	},
 	["skills"] = {
-		description = "Print the current reference's skills.",
+		description = "Print the current reference's skills",
 		callback = function(argv)
 			local ref = data.getCurrentRef()
 			if not ref then
@@ -348,7 +364,7 @@ data.commands = {
 		end,
 	},
 	["speedy"] = {
-		description = "Increase the player's speed to 200, athletics to 200.",
+		description = "Increase the player's speed to 200, athletics to 200",
 		callback = function(argv)
 			tes3.setStatistic({ reference = tes3.player, attribute = tes3.attribute.speed, value = 200 })
 			tes3.setStatistic({ reference = tes3.player, skill = tes3.skill.athletics, value = 200 })
@@ -390,6 +406,7 @@ data.commands = {
 	},
 	["position"] = {
 		description = "Teleport the player to a npc with specified id",
+		alias = { "moveto" },
 		arguments = { { index = 1, metavar = "id", required = true, help = "the id of the npc to teleport to" } },
 		callback = function(argv)
 			local refId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
@@ -435,7 +452,7 @@ data.commands = {
 	},
 	-- NPC command
 	["emptyinventory"] = {
-		description = "Empty the current reference's inventory.",
+		description = "Empty the current reference's inventory",
 		arguments = { { index = 1, metavar = "player", required = false, help = "specified to empty player inventory" } },
 		callback = function(argv)
 			if argv[1] == "player" then
@@ -451,7 +468,7 @@ data.commands = {
 		end,
 	},
 	["follow"] = {
-		description = "Make the current reference your follower.",
+		description = "Make the current reference your follower",
 		callback = function(argv)
 			local ref = data.getCurrentRef()
 			if not ref then
@@ -461,7 +478,7 @@ data.commands = {
 		end,
 	},
 	["kill"] = {
-		description = "Kill the current reference. For safety reason, type kill player to kill the player.",
+		description = "Kill the current reference. For safety reason, type kill player to kill the player",
 		arguments = { { index = 1, metavar = "player", required = false, help = "specified to kill player" } },
 		callback = function(argv)
 			local ref = data.getCurrentRef()
@@ -478,14 +495,14 @@ data.commands = {
 		end,
 	},
 	["peace"] = {
-		description = "Pacify all enemies. Irreversible.",
+		description = "Pacify all enemies. Irreversible",
 		callback = function(argv)
 			calm()
 			event.register("cellChanged", calm)
 		end,
 	},
 	["resurrect"] = {
-		description = "Resurrect the current reference and keep the inventory.",
+		description = "Resurrect the current reference and keep the inventory",
 		callback = function(argv)
 			local ref = data.getCurrentRef()
 			if ref and ref.mobile then
@@ -495,7 +512,7 @@ data.commands = {
 		end,
 	},
 	["showinventory"] = {
-		description = "Show the current reference's inventory.",
+		description = "Show the current reference's inventory",
 		callback = function(argv)
 			local ref = data.getCurrentRef()
 			if not ref then
@@ -509,7 +526,7 @@ data.commands = {
 		end,
 	},
 	["spawn"] = {
-		description = "Spawn a reference with the specified id.",
+		description = "Spawn a reference with the specified id",
 		arguments = { { index = 1, metavar = "id", required = true, help = "the id of the reference to spawn" } },
 		callback = function(argv)
 			local obj = tes3.getObject(argv[1])
@@ -521,7 +538,7 @@ data.commands = {
 		end,
 	},
 	["wander"] = {
-		description = "Make the current reference wander.",
+		description = "Make the current reference wander",
 		callback = function(argv)
 			local ref = data.getCurrentRef()
 			if not ref then
@@ -532,7 +549,7 @@ data.commands = {
 	},
 	-- item commands
 	["addall"] = {
-		description = "Add all objects of the objectType type to the current reference's inventory.",
+		description = "Add all objects of the objectType type to the current reference's inventory",
 		arguments = {
 			{ index = 1, metavar = "name", required = true, choices = data.objectTypeNames, help = "the name of the object type to add all" },
 			{ index = 2, metavar = "value", required = false, help = "the add item count" },
@@ -564,7 +581,7 @@ data.commands = {
 		end,
 	},
 	["addone"] = {
-		description = "Add one object of the objectType type to the current reference's inventory.",
+		description = "Add one object of the objectType type to the current reference's inventory",
 		arguments = {
 			{ index = 1, metavar = "name", required = true, choices = data.objectTypeNames, help = "the name of the object type to add one" },
 			{ index = 2, metavar = "value", required = false, help = "the add item count" },
@@ -612,21 +629,20 @@ data.commands = {
 		end,
 	},
 	["setownership"] = {
-		description = "Set ownership of the current reference to none, or the specified NPC or faction with specified base ID.",
-		arguments = { { index = 1, metavar = "id", required = false, help = "the base id of the npc or faction to set ownership" } },
-		---@param argv string[]?
+		description = "Set ownership of the current reference to none, or the specified NPC or faction with specified base ID",
+		arguments = { { index = 1, containsSpaces = true, metavar = "id", required = false, help = "the base id of the npc or faction to set ownership" } },
 		callback = function(argv)
 			local ref = data.getCurrentRef()
 			if not ref then
 				return
 			end
-			local owner = argv and not table.empty(argv) and table.concat(argv, " ") or nil
+			local owner = argv[1] ~= "" and argv[1] or nil
 			local faction = owner and tes3.getFaction(owner)
 			local npc = owner and tes3.getObject(owner)
 			if not (npc and npc.objectType == tes3.objectType.npc) then
 				npc = nil
 			end
-			---@cast npc tes3npc
+			---@cast npc tes3npc?
 			if not owner then
 				tes3.setOwner({ reference = ref, remove = true })
 				tes3ui.log("Clear %s ownership", ref.id)
@@ -644,7 +660,8 @@ data.commands = {
 	},
 	--- world cheats
 	["weather"] = {
-		description = "Set current weather.",
+		description = "Set current weather",
+		aliases = { "forceweather", "fw" },
 		arguments = { { index = 1, metavar = "weather", required = true, choices = data.weather, help = "the name of the weather" } },
 		callback = function(argv)
 			local weatherController = tes3.worldController.weatherController
@@ -657,7 +674,7 @@ data.commands = {
 	},
 	--- util
 	["cls"] = {
-		description = "Clear console.",
+		description = "Clear console",
 		callback = function(argv)
 			if (not console) then
 				return
@@ -666,11 +683,37 @@ data.commands = {
 		end,
 	},
 	["qqq"] = {
-		description = "Quit Morrowind.",
+		aliases = { "quitgame" },
+		description = "Quit Morrowind",
 		callback = function(argv)
 			os.exit()
 		end,
 	},
 }
+
+---@param cmd command.data
+function data.new(cmd)
+
+	local name = cmd.name
+	name = name:lower() -- Make sure the command is lower case
+	if data.commands[name] then
+		log:error("Attempt to create existing command `%s`. Use `modify()` instead.", name)
+		return
+	end
+
+	local commandData = {}
+	local fields = command.schema.fields
+	for field, fieldData in pairs(fields) do
+		if fieldData.type == "table" then
+			commandData[field] = table.deepcopy(cmd[field])
+		else
+			commandData[field] = cmd[field]
+		end
+	end
+
+	data.commands[name] = commandData
+end
+
+data.aliases = {}
 
 return data
