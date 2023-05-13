@@ -679,7 +679,7 @@ data.commands = {
 			if (not console) then
 				return
 			end
-			console:findChild("MenuConsole_scroll_pane"):findChild("PartScrollPane_pane"):destroyChildren()
+			tes3ui.findMenu(console):findChild("MenuConsole_scroll_pane"):findChild("PartScrollPane_pane"):destroyChildren()
 		end,
 	},
 	["qqq"] = {

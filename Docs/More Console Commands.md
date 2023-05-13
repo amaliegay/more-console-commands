@@ -88,7 +88,6 @@ Usage: help
 Usage: kaching
 
 Description: If the current reference is given, they will be given 1,000 gold. If not, the player will be given 1,000 gold.
-
 ```
 
 ### motherlode - Give current reference 50,000 gold.
@@ -97,25 +96,21 @@ Description: If the current reference is given, they will be given 1,000 gold. I
 Usage: motherlode
 
 Description: If the current reference is given, they will be given 50,000 gold. If not, the player will be given 50,000 gold.
-
 ```
 
 ### money - Set current reference gold amount to the input value.
-
 ```
 Usage: money <amount>
 
 Description: If the current reference is given, the amount of gold they carry will be set to given the input value amount. If not, the amount of gold the player has will be set to given the input value amount. Note that parameters don't take variables. 
 
 Example: money 420 -- Set the gold amount to 420
-
 ```
 
 ### cure - Cure current reference of disease, blight, poison, and restore attributes and skills
 
 ```
 Usage: cure
-
 ```
 
 ### levelup - Increase the player's Skill Module skill by the input value.
@@ -212,6 +207,8 @@ mark guild_hall -- Mark the current cell and position as guild_hall
 ### position - Teleport the player to a npc with specified id.
 
 ```
+Alias: moveto
+
 Usage: position <id>
 
 Example: 
@@ -352,6 +349,8 @@ setownership mages guild -- Set current reference ownership to Mages Guild
 ### weather - Change the current weather immediately to the specified weather
 
 ```
+Aliases: forceweather/fw
+
 Usage: weather weatherId
 
 Example:
@@ -370,5 +369,7 @@ Usage: cls
 ### qqq - Quit Morrowind
 
 ```
+Aliases: quitgame
+
 Usage: qqq
 ```
