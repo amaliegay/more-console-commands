@@ -4,13 +4,13 @@ description = "a collection of commonly used console commands via UI Expansion L
 homepage = "https://www.nexusmods.com/morrowind/mods/52500"
 repository = "https://github.com/amaliegay/more-console-commands"
 authors = [ "JosephMcKean",]
-version = "1.13.1"
+version = "1.14.0"
 
 [dependencies]
 assets = [ "MWSE/mods/JosephMcKean/commands",]
 
 [dependencies.mwse]
-buildnumber = 3210
+buildnumber = 3213
 
 [dependencies.mods."UI Expansion"]
 version = "^1.6.3"
