@@ -38,14 +38,14 @@ end
 event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole", priority = -9999 })
 
 ---@param command string
----@return string fn?
+---@return string? fn
 ---@return string[] args
 local function getArgs(command)
 	local args = {} ---@type string[]
 	for w in string.gmatch(command, "%S+") do
 		table.insert(args, w)
 	end
-	local fn = args[1]:lower()
+	local fn = args[1] and args[1]:lower()
 	if fn then
 		table.remove(args, 1)
 	end
@@ -123,13 +123,18 @@ event.register("UIEXP:consoleCommand", function(e)
 		return
 	end
 	local command = e.command ---@type string
+	if not command then
+		return
+	end
 	local fnAlias, args = getArgs(command)
+	if not fnAlias then
+		return
+	end
 	local fn = getAlias(fnAlias)
 	if not fn then
 		return
 	end
 	local parseResult = parseArgs(fn, args)
-	log:debug("parseResult = %s", parseResult)
 	if parseResult then
 		data.commands[fn].callback(args)
 	end
@@ -141,6 +146,9 @@ event.register("UIEXP:consoleCommand", function(e)
 		return
 	end
 	local command = e.command ---@type string
+	if not command then
+		return
+	end
 	local fn, _ = getArgs(command)
 	if fn ~= "help" then
 		return
@@ -151,6 +159,10 @@ event.register("UIEXP:consoleCommand", function(e)
 	end
 	e.block = true
 end, { priority = -9999 })
+
+event.register("UIEXP:sandboxConsole", function(e)
+    e.sandbox.command = require("JosephMcKean.commands.interop")
+end)
 
 event.register("initialized", function()
 	event.trigger("command:register")

@@ -18,6 +18,12 @@ function interop.registerCommand(command)
 	data.new(command)
 end
 
+---@param command string
+function interop.run(command)
+	local context = "lua"
+	event.trigger("UIEXP:consoleCommand", { command = command, context = context }, { filter = context })
+end
+
 return interop
 
 --[[
