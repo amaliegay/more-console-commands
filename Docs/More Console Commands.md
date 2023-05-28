@@ -6,9 +6,10 @@ For basic help, type the command line: help
 
 ## Requirements
 
-To get access to Lua console, 
-- First you'll need MWSE-Lua, which is bundled in [MGE XE](https://www.nexusmods.com/morrowind/mods/41102). So install that and run the MWSE-Updater.exe. 
-- Second, you'll need NullCascade's [UI Expansion](https://www.nexusmods.com/morrowind/mods/46071) installed. 
+To get access to Lua console,
+
+- First you'll need MWSE-Lua, which is bundled in [MGE XE](https://www.nexusmods.com/morrowind/mods/41102). So install that and run the MWSE-Updater.exe.
+- Second, you'll need NullCascade's [UI Expansion](https://www.nexusmods.com/morrowind/mods/46071) installed.
 - Once in game, press ` to bring up the console menu. Press the mwscript button to switch to lua console. Done! (Press the button again to switch back)
 
 ## Contact
@@ -55,7 +56,7 @@ kill
 peace (v1.12)
     Pacify all the enemies. Irreversible.
 resurrect
-    Resurrect the current reference and keep the inventory. 
+    Resurrect the current reference and keep the inventory.
 showinventory
     Show the current reference inventory
 spawn
@@ -72,6 +73,8 @@ weather (v1.11)
     Change the current weather immediately.
 cls (v1.9)
     Clear console
+lookup (v1.15.0)
+    Look up objects by id or name
 qqq (v1.4, requested by Hedy and EarthApocalypto)
     Quit Morrowind
 ```
@@ -99,10 +102,11 @@ Description: If the current reference is given, they will be given 50,000 gold. 
 ```
 
 ### money - Set current reference gold amount to the input value.
+
 ```
 Usage: money <amount>
 
-Description: If the current reference is given, the amount of gold they carry will be set to given the input value amount. If not, the amount of gold the player has will be set to given the input value amount. Note that parameters don't take variables. 
+Description: If the current reference is given, the amount of gold they carry will be set to given the input value amount. If not, the amount of gold the player has will be set to given the input value amount. Note that parameters don't take variables.
 
 Example: money 420 -- Set the gold amount to 420
 ```
@@ -118,9 +122,9 @@ Usage: cure
 ```
 Usage: levelup skillname amount
 
-Description: If valid skillname is given, according skill level will increase by the input value amount. 
+Description: If valid skillname is given, according skill level will increase by the input value amount.
 
-Example: 
+Example:
 
 levelup bushcrafting 10 -- Increase the Ashfall Bushcrafting skill by 10
 
@@ -152,7 +156,7 @@ woodworking (Morrowind Crafting)
 ```
 Usage: max value?
 
-Example: 
+Example:
 
 max -- set all attributes all skills to 200
 max 999 -- set all attributes all skills to 999
@@ -163,9 +167,9 @@ max 999 -- set all attributes all skills to 999
 ```
 Usage: set health value, set magicka value, set fatigue value, set attribute value, set skill value
 
-Description: skill needs to be onesingleword like block, mediumarmor, handtohand. 
+Description: skill needs to be onesingleword like block, mediumarmor, handtohand.
 
-Example: 
+Example:
 
 set health 200
 set luck 200
@@ -195,9 +199,9 @@ Usage: fly
 ```
 Usage: mark <id>
 
-Description: If no id is given, a list of previous marks will be printed. If id is given, the current cell and position of the player will be saved and previous mark using the same id will be overwritten. Marks can be accessed across all saves. Note that parameters don't take variables. 
+Description: If no id is given, a list of previous marks will be printed. If id is given, the current cell and position of the player will be saved and previous mark using the same id will be overwritten. Marks can be accessed across all saves. Note that parameters don't take variables.
 
-Example: 
+Example:
 
 mark -- Show a list of previous marks
 mark myhome -- Mark the current cell and position as myhome
@@ -211,7 +215,7 @@ Alias: moveto
 
 Usage: position <id>
 
-Example: 
+Example:
 
 position caius cosades -- Teleport the player to NPC Caius Cosades
 ```
@@ -221,9 +225,9 @@ position caius cosades -- Teleport the player to NPC Caius Cosades
 ```
 Usage: recall <id>
 
-Description: If no id is given, a list of previous marks will be printed. If id is given and the mark exists, the player will be teleported to the marked location. Note that parameters don't take variables. 
+Description: If no id is given, a list of previous marks will be printed. If id is given and the mark exists, the player will be teleported to the marked location. Note that parameters don't take variables.
 
-Example: 
+Example:
 
 recall -- Show a list of previous marks
 recall myhome -- Teleport the player to the previous mark myhome
@@ -242,7 +246,7 @@ Example:
 emptyinventory -- empty current reference's inventory, except player's
 emptyinventory player -- empty player's inventory
 ```
-    
+
 ### follow - Make the current reference your follower.
 
 ```
@@ -301,7 +305,7 @@ spawn femgoth -- error: invalid object id
 ```
 Usage: wander
 
-Description: If a npc or a creature is selected as the current reference, they will wander and stop following the player. 
+Description: If a npc or a creature is selected as the current reference, they will wander and stop following the player.
 ```
 
 ### addall - Add all objects of the objectType type to the current reference's inventory
@@ -315,8 +319,8 @@ Valid objectType includes: alchemy, ammunition, apparatus, armor, book, clothing
 
 Example:
 
-addall ingredient 5 -- Add 5 of all ingredients in the game to the inventory of the current reference 
-addall apparatus -- Add 1 of all apparatus in the game to the inventory of the current reference 
+addall ingredient 5 -- Add 5 of all ingredients in the game to the inventory of the current reference
+addall apparatus -- Add 1 of all apparatus in the game to the inventory of the current reference
 ```
 
 ### addone - Add one object of the objectType type to the current reference's inventory
@@ -364,6 +368,12 @@ weather blight -- Switch the weather immediately to blight weather
 
 ```
 Usage: cls
+```
+
+### lookup - Look up objects by id or name
+
+```
+Usage: lookup name
 ```
 
 ### qqq - Quit Morrowind

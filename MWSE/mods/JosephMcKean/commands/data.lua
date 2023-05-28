@@ -295,6 +295,10 @@ data.commands = {
 		callback = function(argv)
 			local ref = data.getCurrentRef() or tes3.player
 			if not ref then return end
+			if not ref.mobile then
+				tes3ui.log("Reference has no mobile. Please make sure you have the right currentRef selected.")
+				return
+			end
 			local name = getName(argv[1])
 			tes3.setStatistic({ reference = ref, name = name, value = tonumber(argv[2]) })
 		end,
@@ -609,6 +613,34 @@ data.commands = {
 		callback = function(argv)
 			if (not console) then return end
 			tes3ui.findMenu(console):findChild("MenuConsole_scroll_pane"):findChild("PartScrollPane_pane"):destroyChildren()
+		end,
+	},
+	["lookup"] = {
+		description = "Look up objects by id or name",
+		arguments = { { index = 1, metavar = "name", required = true, help = "the id or name of the object to look up" } },
+		callback = function(argv)
+			local name = argv[1]:lower()
+			local lookUpObjs = {}
+			for object in tes3.iterateObjects() do
+				local obj = object ---@cast obj tes3object|tes3npc
+				local objId = obj.id and obj.id:lower()
+				local objName = obj.name and obj.name:lower()
+				if objId:find(name) or (objName and objName:find(name)) then table.insert(lookUpObjs, obj) end
+			end
+			if table.empty(lookUpObjs) then
+				tes3ui.log("No matching information")
+			else
+				tes3ui.log("%s matching information:", #lookUpObjs)
+				---@param obj tes3object|tes3npc
+				for _, obj in ipairs(lookUpObjs) do
+					local info = string.format("- %s, %s", table.find(tes3.objectType, obj.objectType), obj.id)
+					if obj.name then info = string.format("%s, %s", info, obj.name) end
+					local ref = tes3.getReference(obj.id)
+					if ref and ref.cell then info = string.format("%s, %s", info, ref.cell.name) end
+					if obj.sourceMod then info = string.format("%s, %s", info, obj.sourceMod) end
+					tes3ui.log(info)
+				end
+			end
 		end,
 	},
 	["qqq"] = { aliases = { "quitgame" }, description = "Quit Morrowind", callback = function(argv) os.exit() end },
