@@ -173,7 +173,7 @@ local function giveGold(count)
 		return
 	end
 	tes3.addItem({ reference = ref, item = "gold_001", count = count, showMessage = true })
-	tes3ui.log("%s gold added to %s inventory", count, ref.object.name)
+	tes3ui.log("%s gold added to %s inventory", count, ref.id)
 end
 
 ---@param npc tes3mobileNPC
@@ -552,7 +552,30 @@ data.commands = {
 					end
 				end
 			end
-			tes3ui.log("addall %s to %s", argv[1], ref.object.name)
+			tes3ui.log("addall %s to %s", argv[1], ref.id)
+		end,
+	},
+	["additem"] = {
+		description = "Add item(s) to the current reference's inventory",
+		arguments = { { index = 1, metavar = "id", required = true, help = "the id of the item to add" }, { index = 2, metavar = "count", required = false, help = "the add item count" } },
+		callback = function(argv)
+			local ref = data.getCurrentRef() or tes3.player
+			if not ref then return end
+			if not ref.object.inventory then
+				tes3ui.log("error: %s does not have an inventory", ref.object.name or ref.id)
+				return
+			end
+			local count = tonumber(argv[#argv])
+			if count then table.remove(argv, #argv) end
+			local itemId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
+			if not itemId then return end
+			local item = tes3.getObject(itemId)
+			if not item then
+				tes3ui.log("additem: error: itemId %s not found", itemId)
+				return
+			end
+			tes3.addItem({ reference = ref, item = itemId, count = count, playSound = false })
+			tes3ui.log("additem %s%s to %s", count and count .. " " or "", itemId, ref.id)
 		end,
 	},
 	["addone"] = {
@@ -581,7 +604,7 @@ data.commands = {
 					if filter == tes3.objectType.light then
 						if object.canCarry then
 							tes3.addItem({ reference = ref, item = object.id, count = count, playSound = false })
-							tes3ui.log("addone %s to %s", argv[1], ref.object.name)
+							tes3ui.log("addone %s to %s", argv[1], ref.id)
 							return
 						end
 					else
@@ -591,7 +614,7 @@ data.commands = {
 						end
 						if not isGold(object.id:lower()) then
 							tes3.addItem({ reference = ref, item = object.id, count = count, playSound = false })
-							tes3ui.log("addone %s to %s", argv[1], ref.object.name)
+							tes3ui.log("addone %s to %s", argv[1], ref.id)
 							return
 						end
 					end
