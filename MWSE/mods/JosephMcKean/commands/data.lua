@@ -1,6 +1,9 @@
-local config = require("JosephMcKean.commands.config")
+local logger = require("logging.logger")
 
-local log = require("logging.logger").new({ name = "More Console Commands - data", logLevel = config.logLevel })
+local config = require("JosephMcKean.commands.config")
+local didYouMean = require("JosephmcKean.commands.didYouMean")
+
+local log = logger.new({ name = "More Console Commands - data", logLevel = config.logLevel })
 
 local console = tes3ui.registerID("MenuConsole")
 local data = {}
@@ -257,15 +260,34 @@ data.commands = {
 				tes3.applyMagicSource({ reference = ref, source = cureCommon, castChance = 100, bypassResistances = true })
 				tes3.applyMagicSource({ reference = ref, source = cureBlight, castChance = 100, bypassResistances = true })
 			end
-			if tes3.isAffectedBy({ reference = ref, effect = tes3.effect.poison }) then
-				tes3.applyMagicSource({ reference = ref, source = curePoison, castChance = 100, bypassResistances = true })
-			end
+			if tes3.isAffectedBy({ reference = ref, effect = tes3.effect.poison }) then tes3.applyMagicSource({ reference = ref, source = curePoison, castChance = 100, bypassResistances = true }) end
 			tes3.applyMagicSource({ reference = ref, source = restoreAttribute, castChance = 100, bypassResistances = true })
 			-- Restore Skills
 			tes3.applyMagicSource({ reference = ref, source = restoreSkillsFighter, castChance = 100, bypassResistances = true })
 			tes3.applyMagicSource({ reference = ref, source = restoreSkillsMage, castChance = 100, bypassResistances = true })
 			tes3.applyMagicSource({ reference = ref, source = restoreSkillsThief, castChance = 100, bypassResistances = true })
 			tes3.applyMagicSource({ reference = ref, source = restoreSkillsOther, castChance = 100, bypassResistances = true })
+		end,
+	},
+	["join"] = {
+		description = "Join the specified faction and raise to the specified rank.",
+		aliases = { "addtofaction" },
+		arguments = {
+			{ index = 1, metavar = "faction-id", required = true, help = "the id of the faction you wish to join" },
+			{ index = 2, metavar = "rank", required = false, help = "the rank in the faction" },
+		},
+		callback = function(argv)
+			local rank = tonumber(argv[#argv])
+			if rank then table.remove(argv, #argv) end
+			local factionId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
+			local faction = factionId and tes3.getFaction(factionId)
+			if not faction then
+				tes3ui.log("join: error: factionId %s not found", factionId)
+				if didYouMean[factionId] then tes3ui.log("Did you mean: %s", didYouMean[factionId]) end
+				return
+			end
+			faction.playerJoined = true
+			faction.playerRank = rank or 0
 		end,
 	},
 	["levelup"] = {
@@ -296,7 +318,7 @@ data.commands = {
 			local ref = data.getCurrentRef() or tes3.player
 			if not ref then return end
 			if not ref.mobile then
-				tes3ui.log("Reference has no mobile. Please make sure you have the right currentRef selected.")
+				tes3ui.log("set: error: currentRef has no mobile.")
 				return
 			end
 			local name = getName(argv[1])
@@ -352,8 +374,8 @@ data.commands = {
 				}
 				mwse.saveConfig(modName, config)
 				tes3ui.log("%s: %s", argv[1], tes3.player.cell.editorName)
-				mwse.log("marks[%s].cell = {\nname = %s,\ncell = %s,\nposition = { %s, %s, %s },\norientation = { %s, %s, %s }\n}", argv[1], tes3.player.cell.editorName,
-				         cell, position.x, position.y, position.z, orientation.x, orientation.y, orientation.z)
+				mwse.log("marks[%s].cell = {\nname = %s,\ncell = %s,\nposition = { %s, %s, %s },\norientation = { %s, %s, %s }\n}", argv[1], tes3.player.cell.editorName, cell, position.x, position.y,
+				         position.z, orientation.x, orientation.y, orientation.z)
 			end
 		end,
 	},
@@ -393,11 +415,7 @@ data.commands = {
 							forceCellChange = true,
 						})
 					else
-						tes3.positionCell({
-							position = { mark.position.x, mark.position.y, mark.position.z },
-							orientation = { mark.orientation.x, mark.orientation.y },
-							forceCellChange = true,
-						})
+						tes3.positionCell({ position = { mark.position.x, mark.position.y, mark.position.z }, orientation = { mark.orientation.x, mark.orientation.y }, forceCellChange = true })
 					end
 				end
 			end
@@ -547,15 +565,7 @@ data.commands = {
 						end
 					else
 						local function isGold(id)
-							local goldList = {
-								["gold_001"] = true,
-								["gold_005"] = true,
-								["gold_010"] = true,
-								["gold_025"] = true,
-								["gold_100"] = true,
-								["gold_dae_cursed_001"] = true,
-								["gold_dae_cursed_005"] = true,
-							}
+							local goldList = { ["gold_001"] = true, ["gold_005"] = true, ["gold_010"] = true, ["gold_025"] = true, ["gold_100"] = true, ["gold_dae_cursed_001"] = true, ["gold_dae_cursed_005"] = true }
 							return goldList[id]
 						end
 						if not isGold(object.id:lower()) then
