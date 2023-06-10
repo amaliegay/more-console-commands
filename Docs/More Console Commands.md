@@ -29,6 +29,8 @@ money
     Set current reference gold amount to the input value.
 cure (v1.8)
     Cure current reference of disease, blight, poison, and restore attributes and skills
+join (v1.16)
+    Join the faction with the specifed id and raise to specified rank
 levelup
     Increase the player's Skill Module skill by the input value.
 max (v1.7, requested by iszlev)
@@ -65,6 +67,8 @@ wander
     Make the current reference wander and stop following
 addall (v1.2, requested by VitruvianGuar)
     Add all objects of the objectType type to the current reference's inventory
+additem (v.17.0)
+    Add item with specified id
 addone
     Add one objet of the objectType type to the current reference's inventory
 setownership (v1.9, requested by Markel)
@@ -115,6 +119,18 @@ Example: money 420 -- Set the gold amount to 420
 
 ```
 Usage: cure
+```
+
+### join - Join the faction with the specifed id and raise to specified rank
+
+```
+Usage: join faction-id rank?
+
+Example: 
+
+join telvanni -- Join the Great House Telvanni
+join mages guild 3 -- Join the Mages Guild and raise to Evoker
+
 ```
 
 ### levelup - Increase the player's Skill Module skill by the input value.
@@ -321,6 +337,17 @@ Example:
 
 addall ingredient 5 -- Add 5 of all ingredients in the game to the inventory of the current reference
 addall apparatus -- Add 1 of all apparatus in the game to the inventory of the current reference
+```
+
+### additem - Add item with specified id
+
+```
+Usage: aditem item-id count?
+
+Example:
+
+additem iron tanto -- Add an iron tanto to current reference's inventory
+additem silver throwing star 100 -- Add 100 silver throwing stars to the current reference's inventory
 ```
 
 ### addone - Add one object of the objectType type to the current reference's inventory
