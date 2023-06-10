@@ -149,7 +149,7 @@ local function removeItems(params)
 	local ref = params.reference
 	if not ref then return end
 	if not ref.object.inventory then
-		tes3ui.log("Invalid current reference provided: reference does not have an inventory.")
+		tes3ui.log("error: %s does not have an inventory", ref.object.name or ref.id)
 		return
 	end
 	if params.goldOnly then
@@ -167,7 +167,13 @@ end
 local function giveGold(count)
 	if count <= 0 then return end
 	local ref = data.getCurrentRef() or tes3.player ---@type tes3reference
-	if ref then tes3.addItem({ reference = ref, item = "gold_001", count = count, showMessage = true }) end
+	if not ref then return end
+	if not ref.object.inventory then
+		tes3ui.log("error: %s does not have an inventory", ref.object.name or ref.id)
+		return
+	end
+	tes3.addItem({ reference = ref, item = "gold_001", count = count, showMessage = true })
+	tes3ui.log("%s gold added to %s inventory", count, ref.object.name)
 end
 
 ---@param npc tes3mobileNPC
@@ -237,6 +243,11 @@ data.commands = {
 		arguments = { { index = 1, metavar = "goldcount", required = true, help = "the amount of gold to add" } },
 		callback = function(argv)
 			local ref = data.getCurrentRef() or tes3.player ---@type tes3reference
+			if not ref then return end
+			if not ref.object.inventory then
+				tes3ui.log("error: %s does not have an inventory", ref.object.name or ref.id)
+				return
+			end
 			local count = tonumber(argv[1])
 			if not count then return end
 			removeItems({ reference = ref, goldOnly = true })
@@ -520,6 +531,10 @@ data.commands = {
 		callback = function(argv)
 			local ref = data.getCurrentRef() or tes3.player
 			if not ref then return end
+			if not ref.object.inventory then
+				tes3ui.log("error: %s does not have an inventory", ref.object.name or ref.id)
+				return
+			end
 			local count = tonumber(argv[2])
 			if not count then
 				count = 1
@@ -537,6 +552,7 @@ data.commands = {
 					end
 				end
 			end
+			tes3ui.log("addall %s to %s", argv[1], ref.object.name)
 		end,
 	},
 	["addone"] = {
@@ -548,6 +564,10 @@ data.commands = {
 		callback = function(argv)
 			local ref = data.getCurrentRef() or tes3.player
 			if not ref then return end
+			if not ref.object.inventory then
+				tes3ui.log("error: %s does not have an inventory", ref.object.name or ref.id)
+				return
+			end
 			local filter = data.objectType[argv[1]]
 			local count = tonumber(argv[2])
 			if not count then
@@ -561,6 +581,7 @@ data.commands = {
 					if filter == tes3.objectType.light then
 						if object.canCarry then
 							tes3.addItem({ reference = ref, item = object.id, count = count, playSound = false })
+							tes3ui.log("addone %s to %s", argv[1], ref.object.name)
 							return
 						end
 					else
@@ -570,6 +591,7 @@ data.commands = {
 						end
 						if not isGold(object.id:lower()) then
 							tes3.addItem({ reference = ref, item = object.id, count = count, playSound = false })
+							tes3ui.log("addone %s to %s", argv[1], ref.object.name)
 							return
 						end
 					end
