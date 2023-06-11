@@ -43,6 +43,8 @@ speedy (v1.2, requested by Vengyre)
     Set the player's Speed and Athletics to 200
 fly (v1.11)
     Toggle levitation.
+coc (v1.17)
+    Teleport the player to a cell with specified id
 mark
     Mark the player's current cell and position for recall.
 position (v1.11)
@@ -208,6 +210,14 @@ Usage: help
 
 ```
 Usage: fly
+```
+
+### coc - Teleport the player to a cell with specified id
+
+```
+Usage: coc id
+
+Example: coc dagon fel
 ```
 
 ### mark - Mark the player's current cell and position for recall.

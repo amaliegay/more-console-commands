@@ -203,6 +203,34 @@ local function calm()
 	end
 end
 
+local cells = tes3.dataHandler.nonDynamicData.cells
+local isMarker = {
+	["TravelMarker"] = true,
+	["TempleMarker"] = true,
+	["DivineMarker"] = true,
+	["DoorMarker"] = true
+}
+
+--- This is a generic iterator function used
+--- to loop over a tes3referenceList
+---@param list tes3referenceList
+---@return fun(): tes3reference
+local function iterReferenceList(list)
+    local function iterator()
+        local ref = list.head
+
+        if list.size ~= 0 then
+            coroutine.yield(ref)
+        end
+
+        while ref.nextNode do
+            ref = ref.nextNode
+            coroutine.yield(ref)
+        end
+    end
+    return coroutine.wrap(iterator)
+end
+
 ---@class command.data.argument
 ---@field index integer
 ---@field containsSpaces boolean? If the parameter can contain spaces. Only available for the first parameter
@@ -365,19 +393,54 @@ data.commands = {
 		callback = function(argv)
 			local cellId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
 			if not cellId then
+				tes3ui.log("cellId not found")
+				return
+			end
+			local markers = {} ---@type table<tes3cell,table<string,tes3reference>>
+			for _, cell in ipairs(cells) do
+				if cell.id:lower() == cellId then
+					markers[cell] = {}
+					local statics = cell.statics
+					for static in iterReferenceList(statics) do
+						if isMarker[static.id] and not markers[cell][static.id] then
+							markers[cell][static.id] = static
+						end
+					end
+				end
+			end
+			if table.empty(markers) then
 				tes3ui.log("cellId %s not found", cellId)
 				return
 			end
-			local cell = tes3.getCell({ id = cellId })
-			if not cell then
-				tes3ui.log("cellId %s not found", cellId)
-				return
+			local cell2coc
+			local position = nil
+			local orientation = nil
+			for cell, mks in pairs(markers) do
+				cell2coc = cell
+				if mks["TravelMarker"] then
+					position = mks["TravelMarker"].position
+					orientation = mks["TravelMarker"].orientation
+					break
+				elseif mks["TempleMarker"] then
+					position = mks["TempleMarker"].position
+					orientation = mks["TempleMarker"].orientation
+				elseif mks["DivineMarker"] then
+					position = mks["DivineMarker"].position
+					orientation = mks["DivineMarker"].orientation
+				elseif mks["DoorMarker"] then
+					position = mks["DoorMarker"].position
+					orientation = mks["DoorMarker"].orientation
+				end
 			end
-
-			local position = tes3vector3.new()
-			local gridSize = 8192
-			if not cell.isInterior then position = tes3vector3.new(gridSize / 2 + cell.gridX * gridSize, gridSize / 2 + cell.gridY * gridSize, 2256) end
-			tes3.positionCell({ cell = cell, position = position })
+			if not position then
+				tes3ui.log("No Marker found in %s.", cellId)
+				position = tes3vector3.new()
+				if not cell2coc.isInterior then
+					local gridSize = 8192
+					position = tes3vector3.new(gridSize / 2 + cell2coc.gridX * gridSize, gridSize / 2 + cell2coc.gridY * gridSize, 2256)
+				end
+			end
+			tes3.positionCell({ cell = cell2coc, position = position, orientation = orientation })
 		end,
 	},
 	["fly"] = {
