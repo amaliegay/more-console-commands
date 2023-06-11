@@ -359,6 +359,27 @@ data.commands = {
 		end,
 	},
 	-- teleportation and movements
+	["coc"] = {
+		description = "Teleport the player to a cell with specified id",
+		arguments = { { index = 1, metavar = "id", required = true, help = "the id of the cell to teleport to" } },
+		callback = function(argv)
+			local cellId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
+			if not cellId then
+				tes3ui.log("cellId %s not found", cellId)
+				return
+			end
+			local cell = tes3.getCell({ id = cellId })
+			if not cell then
+				tes3ui.log("cellId %s not found", cellId)
+				return
+			end
+
+			local position = tes3vector3.new()
+			local gridSize = 8192
+			if not cell.isInterior then position = tes3vector3.new(gridSize / 2 + cell.gridX * gridSize, gridSize / 2 + cell.gridY * gridSize, 2256) end
+			tes3.positionCell({ cell = cell, position = position })
+		end,
+	},
 	["fly"] = {
 		description = "Toggle levitate",
 		callback = function(argv)
@@ -396,7 +417,6 @@ data.commands = {
 		arguments = { { index = 1, metavar = "id", required = true, help = "the id of the npc to teleport to" } },
 		callback = function(argv)
 			local refId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
-			log:debug("Positioning refId %s", refId)
 			if refId then
 				local ref = tes3.getReference(refId)
 				if ref and ref.baseObject.objectType == tes3.objectType.npc then
