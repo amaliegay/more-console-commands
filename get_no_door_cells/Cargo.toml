@@ -1,8 +1,11 @@
 [package]
-name = "hello"
+name = "get_no_door_cells"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
+[dependencies.tes3]
+git = "https://github.com/Greatness7/tes3"
+default-features = false
+features = ["esp"]
