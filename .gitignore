@@ -2,3 +2,6 @@
 Packager.bat
 *.7z
 extras
+
+# Rust
+get_no_door_cells/target
