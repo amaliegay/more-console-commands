@@ -7,16 +7,10 @@ local interop = {}
 interop.getCurrentRef = data.getCurrentRef
 
 ---@param commandsData command.data[]
-function interop.registerCommands(commandsData)
-	for _, command in ipairs(commandsData) do
-		interop.registerCommand(command)
-	end
-end
+function interop.registerCommands(commandsData) for _, command in ipairs(commandsData) do interop.registerCommand(command) end end
 
 ---@param command command.data
-function interop.registerCommand(command)
-	data.new(command)
-end
+function interop.registerCommand(command) data.new(command) end
 
 ---@param command string
 function interop.run(command)

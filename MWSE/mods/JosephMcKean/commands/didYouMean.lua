@@ -10,5 +10,5 @@ return {
 	["house telvanni"] = "telvanni",
 	["great house telvanni"] = "telvanni",
 	["tribunal temple"] = "temple",
-    ["imperial legions"] = "imperial legion",
+	["imperial legions"] = "imperial legion",
 }

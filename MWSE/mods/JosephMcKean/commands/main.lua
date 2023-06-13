@@ -27,7 +27,6 @@ local function onMenuConsoleActivated(e)
 		end
 	end)
 end
-event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole", priority = -9999 })
 
 ---@param command string
 ---@return string? fn
@@ -99,7 +98,7 @@ local function getAlias(alias)
 	return nil
 end
 
-event.register("UIEXP:consoleCommand", function(e)
+local function parseCommands(e)
 	if e.context ~= "lua" then return end
 	if not e.command then return end
 	e.command = e.command:match("^`*(.+)") --[[@as string]]
@@ -110,9 +109,9 @@ event.register("UIEXP:consoleCommand", function(e)
 	local parseResult = parseArgs(fn, args)
 	if parseResult then data.commands[fn].callback(args) end
 	e.block = true
-end)
+end
 
-event.register("UIEXP:consoleCommand", function(e)
+local function parseHelpCommand(e)
 	if e.context ~= "lua" then return end
 	if not e.command then return end
 	local command = e.command:match("^`*(.+)") --[[@as string]]
@@ -121,13 +120,15 @@ event.register("UIEXP:consoleCommand", function(e)
 	tes3ui.log("help: Show a list of available commands")
 	for functionName, commandData in pairs(data.commands) do tes3ui.log("%s: %s", functionName, commandData.description) end
 	e.block = true
-end, { priority = -9999 })
-
-event.register("UIEXP:sandboxConsole", function(e) e.sandbox.command = require("JosephMcKean.commands.interop") end)
+end
 
 event.register("initialized", function()
 	event.trigger("command:register")
 	for functionName, commandData in pairs(data.commands) do if commandData.aliases then for _, alias in ipairs(commandData.aliases) do data.aliases[alias] = functionName end end end
+	event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole", priority = -9999 })
+	event.register("UIEXP:consoleCommand", parseCommands)
+	event.register("UIEXP:consoleCommand", parseHelpCommand, { priority = -9999 })
+	event.register("UIEXP:sandboxConsole", function(e) e.sandbox.command = require("JosephMcKean.commands.interop") end)
 end, { priority = -999 })
 
 local function registerModConfig()

@@ -203,32 +203,32 @@ local function calm()
 	end
 end
 
-local cells = tes3.dataHandler.nonDynamicData.cells
-local isMarker = {
-	["TravelMarker"] = true,
-	["TempleMarker"] = true,
-	["DivineMarker"] = true,
-	["DoorMarker"] = true
+local isMarker = { ["TravelMarker"] = true, ["TempleMarker"] = true, ["DivineMarker"] = true, ["DoorMarker"] = true }
+local cellIdAlias = {
+	["mournhold"] = "mournhold, royal palace: courtyard",
+	["mournhold, royal palace"] = "mournhold, royal palace: reception area",
+	["mournhold temple"] = "mournhold temple: reception area",
+	["solstheim"] = "fort frostmoth",
+	["sotha sil"] = "sotha sil, outer flooded halls",
+	["sotha sil,"] = "sotha sil, outer flooded halls",
 }
 
 --- This is a generic iterator function used
 --- to loop over a tes3referenceList
 ---@param list tes3referenceList
 ---@return fun(): tes3reference
-local function iterReferenceList(list)
-    local function iterator()
-        local ref = list.head
+function data.iterReferenceList(list)
+	local function iterator()
+		local ref = list.head
 
-        if list.size ~= 0 then
-            coroutine.yield(ref)
-        end
+		if list.size ~= 0 then coroutine.yield(ref) end
 
-        while ref.nextNode do
-            ref = ref.nextNode
-            coroutine.yield(ref)
-        end
-    end
-    return coroutine.wrap(iterator)
+		while ref.nextNode do
+			ref = ref.nextNode
+			coroutine.yield(ref)
+		end
+	end
+	return coroutine.wrap(iterator)
 end
 
 ---@class command.data.argument
@@ -388,23 +388,44 @@ data.commands = {
 	},
 	-- teleportation and movements
 	["coc"] = {
-		description = "Teleport the player to a cell with specified id",
-		arguments = { { index = 1, metavar = "id", required = true, help = "the id of the cell to teleport to" } },
+		description = "Teleport the player to a cell with specified id or specified grid x and grid y",
+		arguments = { { index = 1, metavar = "id", required = false, help = "the id of the cell to teleport to" } },
 		callback = function(argv)
-			local cellId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
-			if not cellId then
-				tes3ui.log("cellId not found")
-				return
+			local cell2coc
+			local cellId
+
+			local grid = false
+			local gridX = tonumber(argv[1])
+			local gridY = tonumber(argv[2])
+			if gridX and gridY and not argv[3] then
+				cell2coc = tes3.getCell({ x = gridX, y = gridY })
+				if not cell2coc then
+					tes3ui.log("cell %s %s not found", gridX, gridY)
+					return
+				end
+				cellId = cell2coc.id
+				grid = true
+			else
+				cellId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
+				if not cellId then
+					tes3ui.log("cellId not found")
+					return
+				elseif cellIdAlias[cellId] then
+					cellId = cellIdAlias[cellId]
+				end
 			end
+
+			local position = tes3vector3.new()
+			local orientation = tes3vector3.new()
+
 			local markers = {} ---@type table<tes3cell,table<string,tes3reference>>
-			for _, cell in ipairs(cells) do
-				if cell.id:lower() == cellId then
-					markers[cell] = {}
-					local statics = cell.statics
-					for static in iterReferenceList(statics) do
-						if isMarker[static.id] and not markers[cell][static.id] then
-							markers[cell][static.id] = static
-						end
+			if grid then
+				markers[cell2coc] = {}
+			else
+				for _, cell in ipairs(tes3.dataHandler.nonDynamicData.cells) do
+					if cell.id:lower() == cellId then
+						markers[cell] = {}
+						cell2coc = cell2coc or cell
 					end
 				end
 			end
@@ -412,35 +433,53 @@ data.commands = {
 				tes3ui.log("cellId %s not found", cellId)
 				return
 			end
-			local cell2coc
-			local position = nil
-			local orientation = nil
-			for cell, mks in pairs(markers) do
-				cell2coc = cell
-				if mks["TravelMarker"] then
-					position = mks["TravelMarker"].position
-					orientation = mks["TravelMarker"].orientation
-					break
-				elseif mks["TempleMarker"] then
-					position = mks["TempleMarker"].position
-					orientation = mks["TempleMarker"].orientation
-				elseif mks["DivineMarker"] then
-					position = mks["DivineMarker"].position
-					orientation = mks["DivineMarker"].orientation
-				elseif mks["DoorMarker"] then
-					position = mks["DoorMarker"].position
-					orientation = mks["DoorMarker"].orientation
-				end
-			end
-			if not position then
-				tes3ui.log("No Marker found in %s.", cellId)
-				position = tes3vector3.new()
-				if not cell2coc.isInterior then
-					local gridSize = 8192
-					position = tes3vector3.new(gridSize / 2 + cell2coc.gridX * gridSize, gridSize / 2 + cell2coc.gridY * gridSize, 2256)
-				end
+			if not cell2coc.isInterior then
+				local gridSize = 8192
+				position = tes3vector3.new(gridSize / 2 + cell2coc.gridX * gridSize, gridSize / 2 + cell2coc.gridY * gridSize, 994)
 			end
 			tes3.positionCell({ cell = cell2coc, position = position, orientation = orientation })
+
+			timer.delayOneFrame(function()
+				local intervention = false
+				for cell, mks in pairs(markers) do
+					-- TravelMarker, TempleMarker, DivineMarker, and DoorMarker are activators in game but static in TESCS
+					local activators = cell.activators
+					if activators.head then
+						for activator in data.iterReferenceList(activators) do
+							if isMarker[activator.id] and not markers[cell][activator.id] then
+								markers[cell][activator.id] = activator
+								log:debug("Found %s at %s (%s, %s), %s", activator.id, cell.editorName, position.x, position.y, activator.sourceMod)
+							end
+						end
+						cell2coc = cell
+						if mks["TravelMarker"] then
+							position = mks["TravelMarker"].position
+							orientation = mks["TravelMarker"].orientation
+							log:debug("Found TravelMarker at %s (%s, %s)", cell.editorName, position.x, position.y)
+							break
+						end
+						if not intervention and mks["DoorMarker"] then
+							position = mks["DoorMarker"].position
+							orientation = mks["DoorMarker"].orientation
+							log:debug("Found DoorMarker at %s (%s, %s)", cell.editorName, position.x, position.y)
+						end
+						if mks["DivineMarker"] then
+							position = mks["DivineMarker"].position
+							orientation = mks["DivineMarker"].orientation
+							intervention = true
+							log:debug("Found DivineMarker at %s (%s, %s)", cell.editorName, position.x, position.y)
+						end
+						if mks["TempleMarker"] then
+							position = mks["TempleMarker"].position
+							orientation = mks["TempleMarker"].orientation
+							intervention = true
+							log:debug("Found TempleMarker at %s (%s, %s)", cell.editorName, position.x, position.y)
+						end
+					end
+				end
+				log:debug("Teleporting to %s (%s, %s)", cell2coc.editorName, position.x, position.y)
+				tes3.positionCell({ cell = cell2coc, position = position, orientation = orientation })
+			end, timer.real)
 		end,
 	},
 	["fly"] = {

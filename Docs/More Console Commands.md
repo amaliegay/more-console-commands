@@ -212,12 +212,21 @@ Usage: help
 Usage: fly
 ```
 
-### coc - Teleport the player to a cell with specified id
+### coc - Teleport the player to a cell with specified id or specifed grid x and grid y
 
 ```
-Usage: coc id
+Usage: 
 
-Example: coc dagon fel
+coc id
+coc x y
+
+Description: Better coc! You can specify either grid or id. It teleports you to marker instead of inside a rock like vanilla coc.
+
+Example: 
+coc dagon fel -- teleport to Dagon Fel
+coc 13 -1 -- teleport to Erabenimsun Camp
+coc solstheim -- teleport to Fort Frostmoth
+coc mournhold -- teleport to Mournhold, Royal Palace: Courtyard
 ```
 
 ### mark - Mark the player's current cell and position for recall.
