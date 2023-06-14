@@ -128,7 +128,7 @@ Usage: cure
 ```
 Usage: join faction-id rank?
 
-Example: 
+Example:
 
 join telvanni -- Join the Great House Telvanni
 join mages guild 3 -- Join the Mages Guild and raise to Evoker
@@ -215,14 +215,14 @@ Usage: fly
 ### coc - Teleport the player to a cell with specified id or specifed grid x and grid y
 
 ```
-Usage: 
+Usage:
 
 coc id
 coc x y
 
 Description: Better coc! You can specify either grid or id. It teleports you to marker instead of inside a rock like vanilla coc.
 
-Example: 
+Example:
 coc dagon fel -- teleport to Dagon Fel
 coc 13 -1 -- teleport to Erabenimsun Camp
 coc solstheim -- teleport to Fort Frostmoth
@@ -361,7 +361,7 @@ addall apparatus -- Add 1 of all apparatus in the game to the inventory of the c
 ### additem - Add item with specified id
 
 ```
-Usage: aditem item-id count?
+Usage: additem item-id count?
 
 Example:
 
@@ -382,6 +382,17 @@ Example:
 
 addone clothing -- Add a random clothing to the current reference's inventory
 addone ammunition 100 -- Add 100 copies of a random ammunition to the current reference's inventory
+```
+
+### dupe - Duplicate the item that is the current reference to the player's inventory
+
+```
+Usage: dupe count?
+
+Example:
+
+dupe -- Targeting a Common Soul Gem, add a Common Soul Gem to the player's inventory
+dupe 69 -- Targeting Moon Sugar, add 69 Moon Sugar to the player's inventory
 ```
 
 ### setownership - Set ownership of the current reference to none, or the specified NPC or faction with specified base ID

@@ -9,25 +9,6 @@ local console = tes3ui.registerID("MenuConsole")
 local data = {}
 local modName = "More Console Commands"
 
-data.objectType = {
-	["alchemy"] = tes3.objectType.alchemy,
-	["ammunition"] = tes3.objectType.ammunition,
-	["apparatus"] = tes3.objectType.apparatus,
-	["armor"] = tes3.objectType.armor,
-	["book"] = tes3.objectType.book,
-	["clothing"] = tes3.objectType.clothing,
-	["ingredient"] = tes3.objectType.ingredient,
-	["light"] = tes3.objectType.light,
-	["lockpick"] = tes3.objectType.lockpick,
-	["miscitem"] = tes3.objectType.miscItem,
-	["probe"] = tes3.objectType.probe,
-	["repairitem"] = tes3.objectType.repairItem,
-	["weapon"] = tes3.objectType.weapon,
-}
-
-data.objectTypeNames = {} ---@type string[]
-for objectTypeName, _ in pairs(data.objectType) do table.insert(data.objectTypeNames, objectTypeName) end
-
 ---@return tes3reference ref
 function data.getCurrentRef()
 	local ref = tes3ui.findMenu(console):getPropertyObject("MenuConsole_current_ref")
@@ -231,6 +212,38 @@ function data.iterReferenceList(list)
 	return coroutine.wrap(iterator)
 end
 
+data.objectType = {
+	["alchemy"] = tes3.objectType.alchemy,
+	["ammunition"] = tes3.objectType.ammunition,
+	["apparatus"] = tes3.objectType.apparatus,
+	["armor"] = tes3.objectType.armor,
+	["book"] = tes3.objectType.book,
+	["clothing"] = tes3.objectType.clothing,
+	["ingredient"] = tes3.objectType.ingredient,
+	["light"] = tes3.objectType.light,
+	["lockpick"] = tes3.objectType.lockpick,
+	["miscitem"] = tes3.objectType.miscItem,
+	["probe"] = tes3.objectType.probe,
+	["repairitem"] = tes3.objectType.repairItem,
+	["weapon"] = tes3.objectType.weapon,
+}
+
+data.objectTypeNames = {} ---@type string[]
+for objectTypeName, _ in pairs(data.objectType) do table.insert(data.objectTypeNames, objectTypeName) end
+
+---@param object tes3object|tes3light
+---@return boolean
+local function canCarry(object)
+	if table.find(data.objectType, object.objectType) then
+		if object.objectType == tes3.objectType.light then
+			return true
+		else
+			return true
+		end
+	end
+	return false
+end
+
 ---@class command.data.argument
 ---@field index integer
 ---@field containsSpaces boolean? If the parameter can contain spaces. Only available for the first parameter
@@ -362,6 +375,7 @@ data.commands = {
 			end
 			local name = getName(argv[1])
 			tes3.setStatistic({ reference = ref, name = name, value = tonumber(argv[2]) })
+			tes3ui.log("Set %s on %s", name, ref.id)
 		end,
 	},
 	["skills"] = {
@@ -691,9 +705,13 @@ data.commands = {
 			if count then table.remove(argv, #argv) end
 			local itemId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
 			if not itemId then return end
-			local item = tes3.getObject(itemId)
+			local item = tes3.getObject(itemId) ---@cast item tes3object|any
 			if not item then
 				tes3ui.log("additem: error: itemId %s not found", itemId)
+				return
+			end
+			if not canCarry(item) then
+				tes3ui.log("error: %s is not carryable", item.id)
 				return
 			end
 			tes3.addItem({ reference = ref, item = itemId, count = count, playSound = false })
@@ -742,6 +760,22 @@ data.commands = {
 					end
 				end
 			end
+		end,
+	},
+	["dupe"] = {
+		description = "Duplicate the item that is the current reference to the player's inventory",
+		arguments = { { index = 1, metavar = "count", required = false, help = "the count of the item to duplicate" } },
+		callback = function(argv)
+			local ref = data.getCurrentRef()
+			if not ref then return end
+			local item = ref.baseObject
+			if not canCarry(item) then
+				tes3ui.log("error: %s is not carryable", item.name or ref.id)
+				return
+			end
+			local count = tonumber(argv[1])
+			tes3.addItem({ reference = tes3.player, item = item.id, count = count or 1, playSound = false })
+			tes3ui.log("additem %s%s to player", count and count .. " " or "", item.id)
 		end,
 	},
 	["setownership"] = {
