@@ -184,6 +184,12 @@ local function calm()
 	end
 end
 
+---@return tes3cell
+local function randomCell()
+	local cell = table.choice(tes3.dataHandler.nonDynamicData.cells)
+	return cell
+end
+
 local isMarker = { ["TravelMarker"] = true, ["TempleMarker"] = true, ["DivineMarker"] = true, ["DoorMarker"] = true }
 local cellIdAlias = {
 	["mournhold"] = "mournhold, royal palace: courtyard",
@@ -405,8 +411,16 @@ data.commands = {
 		description = "Teleport the player to a cell with specified id or specified grid x and grid y",
 		arguments = { { index = 1, metavar = "id", required = false, help = "the id of the cell to teleport to" } },
 		callback = function(argv)
-			local cell2coc
-			local cellId
+			local cell2coc ---@type tes3cell
+			local cellId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
+			if not cellId then
+				tes3ui.log("cellId not found")
+				return
+			elseif cellIdAlias[cellId] then
+				cellId = cellIdAlias[cellId]
+			elseif cellId == "random" then
+				cell2coc = randomCell()
+			end
 
 			local grid = false
 			local gridX = tonumber(argv[1])
@@ -419,14 +433,6 @@ data.commands = {
 				end
 				cellId = cell2coc.id
 				grid = true
-			else
-				cellId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
-				if not cellId then
-					tes3ui.log("cellId not found")
-					return
-				elseif cellIdAlias[cellId] then
-					cellId = cellIdAlias[cellId]
-				end
 			end
 
 			local position = tes3vector3.new()
@@ -434,6 +440,8 @@ data.commands = {
 
 			local markers = {} ---@type table<tes3cell,table<string,tes3reference>>
 			if grid then
+				markers[cell2coc] = {}
+			elseif cellId == "random" then
 				markers[cell2coc] = {}
 			else
 				for _, cell in ipairs(tes3.dataHandler.nonDynamicData.cells) do
