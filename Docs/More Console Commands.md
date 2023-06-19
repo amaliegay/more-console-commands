@@ -75,6 +75,8 @@ addone
     Add one objet of the objectType type to the current reference's inventory
 setownership (v1.9, requested by Markel)
     Set ownership of the current reference to none, or the specified NPC or faction with specified base ID
+unlock (v1.17)
+    Unlock lock
 weather (v1.11)
     Change the current weather immediately.
 cls (v1.9)
@@ -406,6 +408,12 @@ Example:
 setownership -- Clear current reference ownership
 setownership fargoth -- Set current reference ownership to Fargoth
 setownership mages guild -- Set current reference ownership to Mages Guild
+```
+
+### unlock - Unlock lock
+
+```
+Usage: unlock
 ```
 
 ### weather - Change the current weather immediately to the specified weather

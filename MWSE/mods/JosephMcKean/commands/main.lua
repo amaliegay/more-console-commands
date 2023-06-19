@@ -28,12 +28,21 @@ local function onMenuConsoleActivated(e)
 	end)
 end
 
+---@param w string
+---@return string
+local function unquote(w)
+	local word = w
+	word = word:gsub("^\"", "")
+	word = word:gsub("\"$", "")
+	return word
+end
+
 ---@param command string
 ---@return string? fn
 ---@return string[] args
 local function getArgs(command)
 	local args = {} ---@type string[]
-	for w in string.gmatch(command, "%S+") do table.insert(args, w) end
+	for w in string.gmatch(command, "%S+") do table.insert(args, unquote(w)) end
 	local fn = args[1] and args[1]:lower()
 	if fn then table.remove(args, 1) end
 	return fn, args
@@ -102,6 +111,8 @@ local function parseCommands(e)
 	if e.context ~= "lua" then return end
 	if not e.command then return end
 	e.command = e.command:match("^`*(.+)") --[[@as string]]
+	log:debug("parseCommands %s", e.command)
+	if not e.command then return end
 	local fnAlias, args = getArgs(e.command)
 	if not fnAlias then return end
 	local fn = getAlias(fnAlias)
@@ -115,6 +126,7 @@ local function parseHelpCommand(e)
 	if e.context ~= "lua" then return end
 	if not e.command then return end
 	local command = e.command:match("^`*(.+)") --[[@as string]]
+	if not e.command then return end
 	local fn, _ = getArgs(command)
 	if fn ~= "help" then return end
 	tes3ui.log("help: Show a list of available commands")

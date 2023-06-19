@@ -411,8 +411,13 @@ data.commands = {
 		description = "Teleport the player to a cell with specified id or specified grid x and grid y",
 		arguments = { { index = 1, metavar = "id", required = false, help = "the id of the cell to teleport to" } },
 		callback = function(argv)
+			if not tes3.player then
+				tes3ui.log("Please load a save first.")
+				return
+			end
 			local cell2coc ---@type tes3cell
 			local cellId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
+			log:debug("coc %s", cellId)
 			if not cellId then
 				tes3ui.log("cellId not found")
 				return
@@ -445,7 +450,7 @@ data.commands = {
 				markers[cell2coc] = {}
 			else
 				for _, cell in ipairs(tes3.dataHandler.nonDynamicData.cells) do
-					if cell.id:lower() == cellId then
+					if cell.id:lower() == cellId:lower() then
 						markers[cell] = {}
 						cell2coc = cell2coc or cell
 					end
@@ -622,7 +627,7 @@ data.commands = {
 		description = "Pacify all enemies. Irreversible",
 		callback = function(argv)
 			calm()
-			event.register("cellChanged", calm)
+			if not event.isRegistered("cellChanged", calm) then event.register("cellChanged", calm) end
 		end,
 	},
 	["resurrect"] = {
@@ -713,6 +718,7 @@ data.commands = {
 			if count then table.remove(argv, #argv) end
 			local itemId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
 			if not itemId then return end
+			if didYouMean[itemId] then itemId = didYouMean[itemId] end -- this is a quick and temporary solution, i plan to support crafting framework material
 			local item = tes3.getObject(itemId) ---@cast item tes3object|any
 			if not item then
 				tes3ui.log("additem: error: itemId %s not found", itemId)
@@ -810,6 +816,14 @@ data.commands = {
 				tes3ui.log("usage: setownership id?")
 				tes3ui.log("setownership: error: argument id: invalid input.")
 			end
+		end,
+	},
+	["unlock"] = {
+		description = "Unlock lock",
+		callback = function(argv)
+			local ref = data.getCurrentRef()
+			if not ref then return end
+			tes3.unlock({ reference = ref })
 		end,
 	},
 	--- world cheats
