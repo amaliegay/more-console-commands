@@ -1,22 +1,24 @@
-local data = require("JosephMcKean.commands.data")
-
 ---@class command.interop
 local interop = {}
 
+interop.data = require("JosephMcKean.commands.data")
+
 ---@return tes3reference ref
-interop.getCurrentRef = data.getCurrentRef
+interop.getCurrentRef = interop.data.getCurrentRef
 
 ---@param commandsData command.data[]
 function interop.registerCommands(commandsData) for _, command in ipairs(commandsData) do interop.registerCommand(command) end end
 
 ---@param command command.data
-function interop.registerCommand(command) data.new(command) end
+function interop.registerCommand(command) interop.data.new(command) end
 
 ---@param command string
 function interop.run(command)
 	local context = "lua"
 	event.trigger("UIEXP:consoleCommand", { command = command, context = context }, { filter = context })
 end
+
+event.register("UIEXP:sandboxConsole", function(e) e.sandbox.command = require("JosephMcKean.commands.interop") end)
 
 return interop
 

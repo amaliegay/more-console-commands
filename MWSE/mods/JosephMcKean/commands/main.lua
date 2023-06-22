@@ -140,7 +140,6 @@ event.register("initialized", function()
 	event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole", priority = -9999 })
 	event.register("UIEXP:consoleCommand", parseCommands)
 	event.register("UIEXP:consoleCommand", parseHelpCommand, { priority = -9999 })
-	event.register("UIEXP:sandboxConsole", function(e) e.sandbox.command = require("JosephMcKean.commands.interop") end)
 end, { priority = -999 })
 
 local function registerModConfig()

@@ -3,7 +3,7 @@ local logger = require("logging.logger")
 local config = require("JosephMcKean.commands.config")
 local didYouMean = require("JosephmcKean.commands.didYouMean")
 
-local log = logger.new({ name = "More Console Commands - data", logLevel = config.logLevel })
+local log = logger.new({ name = "More Console Commands", logLevel = config.logLevel })
 
 local console = tes3ui.registerID("MenuConsole")
 local data = {}
@@ -73,30 +73,33 @@ local function getName(name)
 end
 
 data.skillModuleSkills = {
-	["bushcrafting"] = { id = "Bushcrafting", mod = "Ashfall", include = "mer.ashfall.common.common" },
-	["climbing"] = { id = "climbing", mod = "Mantle of Ascension", include = "mantle.main" },
-	["cooking"] = { id = "mc_Cooking", mod = "Morrowind Crafting", include = "Morrowind_Crafting_3.mc_common" },
-	["corpsepreparation"] = { id = "NC:CorpsePreparation", mod = "Necrocraft", include = "necroCraft.main" },
-	["crafting"] = { id = "mc_Crafting", mod = "Morrowind Crafting", include = "Morrowind_Crafting_3.mc_common" },
-	["fishing"] = { id = "fishing", mod = "Ultimate Fishing", include = "mer.fishing" },
-	["fletching"] = { id = "fletching", mod = "Go Fletch", include = "mer.goFletch.main" },
-	["mcfletching"] = { id = "mc_Fletching", mod = "Morrowind Crafting", include = "Morrowind_Crafting_3.mc_common" },
-	["inscription"] = { id = "Hermes:Inscription", mod = "Demon of Knowledge", include = "MMM2018.sx2.main" },
-	["masonry"] = { id = "mc_Masonry", mod = "Morrowind Crafting", include = "Morrowind_Crafting_3.mc_common" },
-	["metalworking"] = { id = "mc_Metalworking", mod = "Morrowind Crafting", include = "Morrowind_Crafting_3.mc_common" },
-	["mining"] = { id = "mc_Mining", mod = "Morrowind Crafting", include = "Morrowind_Crafting_3.mc_common" },
-	["packrat"] = { id = "Packrat", mod = "Packrat Skill", include = "gool.packrat.main" },
-	["painting"] = { id = "painting", mod = "Joy of Painting", include = "mer.joyOfPainting.eventHandlers.InitSkills" },
-	["performance"] = { id = "BardicInspiration:Performance", mod = "Bardic Inspiration", include = "mer.bardicInspiration.controllers.skillController" },
-	["sewing"] = { id = "mc_Sewing", mod = "Morrowind Crafting", include = "Morrowind_Crafting_3.mc_common" },
-	["smithing"] = { id = "mc_Smithing", mod = "Morrowind Crafting", include = "Morrowind_Crafting_3.mc_common" },
-	["staff"] = { id = "MSS:Staff", mod = "MWSE Staff Skill", include = "inpv.Staff Skill.main" },
-	["survival"] = { id = "Ashfall:Survival", mod = "Ashfall", include = "mer.ashfall.common.common" },
-	["woodworking"] = { id = "mc_Woodworking", mod = "Morrowind Crafting", include = "Morrowind_Crafting_3.mc_common" },
+	["bushcrafting"] = { id = "Bushcrafting", mod = "Ashfall", luaMod = "mer.ashfall" },
+	["climbing"] = { id = "climbing", mod = "Mantle of Ascension", luaMod = "mantle" },
+	["cooking"] = { id = "mc_Cooking", mod = "Morrowind Crafting", luaMod = "Morrowind_Crafting_3" },
+	["corpsepreparation"] = { id = "NC:CorpsePreparation", mod = "Necrocraft", luaMod = "necroCraft" },
+	["crafting"] = { id = "mc_Crafting", mod = "Morrowind Crafting", luaMod = "Morrowind_Crafting_3" },
+	["fishing"] = { id = "fishing", mod = "Ultimate Fishing", luaMod = "mer.fishing" },
+	["fletching"] = { id = "fletching", mod = "Go Fletch", luaMod = "mer.goFletch" },
+	["mcfletching"] = { id = "mc_Fletching", mod = "Morrowind Crafting", luaMod = "Morrowind_Crafting_3" },
+	["inscription"] = { id = "Hermes:Inscription", mod = "Demon of Knowledge", luaMod = "MMM2018.sx2" },
+	["masonry"] = { id = "mc_Masonry", mod = "Morrowind Crafting", luaMod = "Morrowind_Crafting_3" },
+	["metalworking"] = { id = "mc_Metalworking", mod = "Morrowind Crafting", luaMod = "Morrowind_Crafting_3" },
+	["mining"] = { id = "mc_Mining", mod = "Morrowind Crafting", luaMod = "Morrowind_Crafting_3" },
+	["packrat"] = { id = "Packrat", mod = "Packrat Skill", luaMod = "gool.packrat" },
+	["painting"] = { id = "painting", mod = "Joy of Painting", luaMod = "mer.joyOfPainting" },
+	["performance"] = { id = "BardicInspiration:Performance", mod = "Bardic Inspiration", luaMod = "mer.bardicInspiration" },
+	["sewing"] = { id = "mc_Sewing", mod = "Morrowind Crafting", luaMod = "Morrowind_Crafting_3" },
+	["smithing"] = { id = "mc_Smithing", mod = "Morrowind Crafting", luaMod = "Morrowind_Crafting_3" },
+	["staff"] = { id = "MSS:Staff", mod = "MWSE Staff Skill", luaMod = "inpv.Staff Skill" },
+	["survival"] = { id = "Ashfall:Survival", mod = "Ashfall", luaMod = "mer.ashfall" },
+	["woodworking"] = { id = "mc_Woodworking", mod = "Morrowind Crafting", luaMod = "Morrowind_Crafting_3" },
 }
 
 data.skillModuleSkillNames = {} ---@type string[]
-for skillname, skillData in pairs(data.skillModuleSkills) do if include(skillData.include) then table.insert(data.skillModuleSkillNames, skillname) end end
+for skillname, skillData in pairs(data.skillModuleSkills) do
+	log:debug("if tes3.isLuaModActive(%s) %s", skillData.luaMod, tes3.isLuaModActive(skillData.luaMod))
+	if tes3.isLuaModActive(skillData.luaMod) then table.insert(data.skillModuleSkillNames, skillname) end
+end
 
 local function listMarks()
 	if not table.empty(config.marks) then
