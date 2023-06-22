@@ -4,7 +4,7 @@ description = "a collection of commonly used console commands via UI Expansion L
 homepage = "https://www.nexusmods.com/morrowind/mods/52500"
 repository = "https://github.com/amaliegay/more-console-commands"
 authors = ["JosephMcKean"]
-version = "1.18.1"
+version = "1.18.0"
 
 [dependencies]
 assets = ["MWSE/mods/JosephMcKean/commands"]
@@ -18,4 +18,4 @@ url = "https://www.nexusmods.com/morrowind/mods/46071"
 
 [tools.mwse]
 lua-mod = "JosephMcKean.commands"
-load-order = -999
+load-order = 999
