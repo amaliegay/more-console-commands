@@ -26,4 +26,7 @@ return {
 	["flint"] = "ashfall_flint",
 	["coal"] = "ashfall_ingred_coal_01",
 	["leather"] = "ashfall_leather",
+
+	-- set
+	["longsword"] = "longblade",
 }

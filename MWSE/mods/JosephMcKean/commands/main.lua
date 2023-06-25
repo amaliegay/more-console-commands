@@ -2,6 +2,8 @@ local config = require("JosephMcKean.commands.config")
 local log = require("logging.logger").new({ name = "More Console Commands - main", logLevel = config.logLevel })
 log:info("initializing")
 
+local didYouMean = require("JosephmcKean.commands.didYouMean")
+
 local data
 
 local modName = "More Console Commands"
@@ -63,13 +65,19 @@ local function parseArgs(fn, args)
 		for _, argument in ipairs(data.commands[fn].arguments) do
 			if argument.index == 1 and argument.containsSpaces then args = { table.concat(args, " ") } end
 			metavars = metavars .. argument.metavar .. " "
+			local arg = args[argument.index]
+			-- didYouMean error
+			if argument.didYouMean and didYouMean[arg] then
+				tes3ui.log("Did you mean: %s", didYouMean[arg])
+				return false
+			end
 			-- missing args error
-			if argument.required and not args[argument.index] then
+			if argument.required and not arg then
 				errored = true
 				missingMetavars = missingMetavars .. argument.metavar .. " "
 			end
 			-- invalid choices error
-			if argument.choices and not table.empty(argument.choices) and not table.find(argument.choices, args[argument.index]) then
+			if argument.choices and not table.empty(argument.choices) and not table.find(argument.choices, arg) then
 				errored = true
 				table.insert(invalidChoiceArgs, argument)
 			end

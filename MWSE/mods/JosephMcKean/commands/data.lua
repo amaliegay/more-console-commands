@@ -260,6 +260,7 @@ end
 ---@field required boolean
 ---@field choices string[]?
 ---@field help string
+---@field didYouMean boolean?
 
 ---@class command.data
 ---@field name string The name of the command
@@ -373,7 +374,7 @@ data.commands = {
 	["set"] = {
 		description = "Set the current reference's attribute or skill base value",
 		arguments = {
-			{ index = 1, metavar = "name", required = true, choices = data.setNames, help = "the name of the attribute or skill to set" },
+			{ index = 1, metavar = "name", required = true, choices = data.setNames, help = "the name of the attribute or skill to set", didYouMean = true },
 			{ index = 2, metavar = "value", required = true, help = "the value to set" },
 		},
 		callback = function(argv)
