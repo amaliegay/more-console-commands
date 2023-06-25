@@ -44,6 +44,7 @@ end
 ---@return string? fn
 ---@return string[] args
 local function getArgs(command)
+	log:trace("getArgs(%s)", command)
 	local args = {} ---@type string[]
 	for w in string.gmatch(command, "%S+") do table.insert(args, unquote(w)) end
 	local fn = args[1] and args[1]:lower()
@@ -54,7 +55,14 @@ end
 ---@param fn string 
 ---@param args string[]
 local function parseArgs(fn, args)
-	if not data.commands[fn].caseSensitive then for _, arg in ipairs(args) do arg = arg:lower() end end
+	log:trace("parseArgs(%s, arg)", fn)
+	if not data.commands[fn].caseSensitive then
+		log:trace("lowercasing args")
+		for i, _ in ipairs(args) do
+			args[i] = args[i]:lower()
+			log:trace("args[%s] = %s", i, args[i])
+		end
+	end
 	if data.commands[fn].arguments then
 		local errored
 		local metavars = ""
@@ -108,6 +116,7 @@ end
 ---@param alias string
 ---@return string?
 local function getAlias(alias)
+	log:trace("getAlias(%s)", alias)
 	if data.commands[alias] then
 		return alias
 	elseif data.aliases[alias] then

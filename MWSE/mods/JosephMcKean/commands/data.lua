@@ -385,6 +385,7 @@ data.commands = {
 				return
 			end
 			local name = getName(argv[1])
+			log:trace("set: name = %s", name)
 			tes3.setStatistic({ reference = ref, name = name, value = tonumber(argv[2]) })
 			tes3ui.log("Set %s on %s", name, ref.id)
 		end,
