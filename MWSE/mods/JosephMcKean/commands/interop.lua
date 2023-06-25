@@ -18,8 +18,6 @@ function interop.run(command)
 	event.trigger("UIEXP:consoleCommand", { command = command, context = context }, { filter = context })
 end
 
-event.register("UIEXP:sandboxConsole", function(e) e.sandbox.command = require("JosephMcKean.commands.interop") end)
-
 return interop
 
 --[[

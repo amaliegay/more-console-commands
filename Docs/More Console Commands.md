@@ -2,7 +2,7 @@
 
 More Console Commands is a collection of commonly used console commands via [UI Expansion](https://www.nexusmods.com/morrowind/mods/46071) Lua console for Morrowind.
 
-For basic help, type the command line: help
+For a list of commands in game, check Mod Config Menu.
 
 ## Requirements
 
@@ -19,8 +19,6 @@ To report issues or request commands, ping me @Amalie#9522 in the Discord server
 ## Commands
 
 ```
-help
-    Shows up available commands.
 kaching
     Give current reference 1,000 gold.
 motherlode
@@ -85,12 +83,6 @@ lookup (v1.15.0)
     Look up objects by id or name
 qqq (v1.4, requested by Hedy and EarthApocalypto)
     Quit Morrowind
-```
-
-### help - Show a list of available commands.
-
-```
-Usage: help
 ```
 
 ### kaching - Give current reference 1,000 gold.

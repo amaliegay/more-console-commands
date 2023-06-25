@@ -1,7 +1,8 @@
 local config = require("JosephMcKean.commands.config")
-local data = require("JosephMcKean.commands.data")
-
 local log = require("logging.logger").new({ name = "More Console Commands - main", logLevel = config.logLevel })
+log:info("initializing")
+
+local data
 
 local modName = "More Console Commands"
 
@@ -122,27 +123,17 @@ local function parseCommands(e)
 	e.block = true
 end
 
-local function parseHelpCommand(e)
-	if e.context ~= "lua" then return end
-	if not e.command then return end
-	local command = e.command:match("^`*(.+)") --[[@as string]]
-	if not e.command then return end
-	local fn, _ = getArgs(command)
-	if fn ~= "help" then return end
-	tes3ui.log("help: Show a list of available commands")
-	for functionName, commandData in pairs(data.commands) do tes3ui.log("%s: %s", functionName, commandData.description) end
-	e.block = true
-end
-
 event.register("initialized", function()
 	event.trigger("command:register")
 	for functionName, commandData in pairs(data.commands) do if commandData.aliases then for _, alias in ipairs(commandData.aliases) do data.aliases[alias] = functionName end end end
 	event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole", priority = -9999 })
 	event.register("UIEXP:consoleCommand", parseCommands)
-	event.register("UIEXP:consoleCommand", parseHelpCommand, { priority = -9999 })
+	local interop = require("JosephMcKean.commands.interop")
+	event.register("UIEXP:sandboxConsole", function(e) e.sandbox.command = interop end)
 end, { priority = -999 })
 
 local function registerModConfig()
+	data = require("JosephMcKean.commands.data")
 	local template = mwse.mcm.createTemplate(modName)
 	template:saveOnClose(modName, config)
 
@@ -153,7 +144,6 @@ local function registerModConfig()
 	settings:createYesNoButton({ label = "Default to lua console", variable = mwse.mcm.createTableVariable({ id = "defaultLuaConsole", table = config }) })
 
 	local info = page:createCategory("Available Commands")
-	info:createInfo({ text = "help: Shows up available communeDeadDesc." })
 	for functionName, commandData in pairs(data.commands) do info:createInfo({ text = string.format("%s: %s", functionName, commandData.description) }) end
 	info:createInfo({
 		text = "\nClick on the object while console menu is open to select the current reference. If nothing is selected, current reference is default to the player. \n" ..

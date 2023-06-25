@@ -265,6 +265,7 @@ end
 ---@field name string The name of the command
 ---@field description string The description of the command
 ---@field arguments command.data.argument[]?
+---@field argPattern string?
 ---@field callback fun(argv:string[]) The callback function
 ---@field aliases string[]?
 ---@field caseSensitive boolean? If the arguments are case sensitive
@@ -286,8 +287,8 @@ local command = {
 ---@type table<string, command>
 data.commands = {
 	-- Money cheats
-	["kaching"] = { description = "Give current reference 1,000 gold", callback = function() giveGold(1000) end },
-	["motherlode"] = { description = "Give current reference 50,000 gold", callback = function() giveGold(50000) end },
+	["kaching"] = { description = "Give current reference 1,000 gold", argPattern = "", callback = function() giveGold(1000) end },
+	["motherlode"] = { description = "Give current reference 50,000 gold", argPattern = "", callback = function() giveGold(50000) end },
 	["money"] = {
 		description = "Set current reference gold amount to the input value. e.g. money 420",
 		arguments = { { index = 1, metavar = "goldcount", required = true, help = "the amount of gold to add" } },
@@ -538,7 +539,7 @@ data.commands = {
 				}
 				mwse.saveConfig(modName, config)
 				tes3ui.log("%s: %s", argv[1], tes3.player.cell.editorName)
-				mwse.log("marks[%s].cell = {\nname = %s,\ncell = %s,\nposition = { %s, %s, %s },\norientation = { %s, %s, %s }\n}", argv[1], tes3.player.cell.editorName, cell, position.x, position.y,
+				log:info("marks[%s].cell = {\nname = %s,\ncell = %s,\nposition = { %s, %s, %s },\norientation = { %s, %s, %s }\n}", argv[1], tes3.player.cell.editorName, cell, position.x, position.y,
 				         position.z, orientation.x, orientation.y, orientation.z)
 			end
 		end,
@@ -657,12 +658,14 @@ data.commands = {
 		description = "Spawn a reference with the specified id",
 		arguments = { { index = 1, metavar = "id", required = true, help = "the id of the reference to spawn" } },
 		callback = function(argv)
-			local obj = tes3.getObject(argv[1])
+			local id = argv and not table.empty(argv) and table.concat(argv, " ") or nil
+			if not id then return end
+			local obj = tes3.getObject(id)
 			if not obj then
-				tes3ui.log("spawn: error: %s is not a valid object id", argv[1])
+				tes3ui.log("spawn: error: %s is not a valid object id", id)
 				return
 			end
-			tes3.createReference({ object = argv[1], position = tes3.player.position, orientation = tes3.player.orientation, cell = tes3.player.cell })
+			tes3.createReference({ object = id, position = tes3.player.position, orientation = tes3.player.orientation, cell = tes3.player.cell })
 		end,
 	},
 	["wander"] = {
