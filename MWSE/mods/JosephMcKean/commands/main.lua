@@ -128,9 +128,10 @@ end
 local function parseCommands(e)
 	if e.context ~= "lua" then return end
 	if not e.command then return end
-	e.command = e.command:match("^`*(.+)") or "" --[[@as string]]
-	log:debug("parseCommands %s", e.command)
+	e.command = e.command:gsub("`", "") --[[@as string]]
+	log:debug("parseCommands \"%s\"", e.command)
 	if not e.command then return end
+	if e.command == "" then return end
 	local fnAlias, args = getArgs(e.command)
 	if not fnAlias then return end
 	local fn = getAlias(fnAlias)
