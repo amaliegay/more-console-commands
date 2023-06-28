@@ -128,7 +128,7 @@ end
 local function parseCommands(e)
 	if e.context ~= "lua" then return end
 	if not e.command then return end
-	e.command = e.command:match("^`*(.+)") --[[@as string]]
+	e.command = e.command:match("^`*(.+)") or "" --[[@as string]]
 	log:debug("parseCommands %s", e.command)
 	if not e.command then return end
 	local fnAlias, args = getArgs(e.command)
@@ -145,9 +145,9 @@ event.register("initialized", function()
 	for functionName, commandData in pairs(data.commands) do if commandData.aliases then for _, alias in ipairs(commandData.aliases) do data.aliases[alias] = functionName end end end
 	event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole", priority = -9999 })
 	event.register("UIEXP:consoleCommand", parseCommands)
-	local interop = require("JosephMcKean.commands.interop")
-	event.register("UIEXP:sandboxConsole", function(e) e.sandbox.command = interop end)
 end, { priority = -999 })
+
+event.register("UIEXP:sandboxConsole", function(e) e.sandbox.command = require("JosephMcKean.commands.interop") end)
 
 local function registerModConfig()
 	data = require("JosephMcKean.commands.data")
