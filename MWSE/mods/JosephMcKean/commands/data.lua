@@ -221,7 +221,11 @@ function data.iterReferenceList(list)
 	return coroutine.wrap(iterator)
 end
 
-data.objectType = {
+---@param name string
+---@return number?
+local function getObjectType(name) return tes3.objectType[name] end
+
+data.canCarryObjectType = {
 	["alchemy"] = tes3.objectType.alchemy,
 	["ammunition"] = tes3.objectType.ammunition,
 	["apparatus"] = tes3.objectType.apparatus,
@@ -237,13 +241,10 @@ data.objectType = {
 	["weapon"] = tes3.objectType.weapon,
 }
 
-data.objectTypeNames = {} ---@type string[]
-for objectTypeName, _ in pairs(data.objectType) do table.insert(data.objectTypeNames, objectTypeName) end
-
 ---@param object tes3object|tes3light
 ---@return boolean
 local function canCarry(object)
-	if table.find(data.objectType, object.objectType) then
+	if table.find(data.canCarryObjectType, object.objectType) then
 		if object.objectType == tes3.objectType.light then
 			return true
 		else
@@ -679,39 +680,6 @@ data.commands = {
 		end,
 	},
 	-- item commands
-	["addall"] = {
-		description = "Add all objects of the objectType type to the current reference's inventory",
-		arguments = {
-			{ index = 1, metavar = "name", required = true, choices = data.objectTypeNames, help = "the name of the object type to add all" },
-			{ index = 2, metavar = "value", required = false, help = "the add item count" },
-		},
-		callback = function(argv)
-			local ref = data.getCurrentRef() or tes3.player
-			if not ref then return end
-			if not ref.object.inventory then
-				tes3ui.log("error: %s does not have an inventory", ref.object.name or ref.id)
-				return
-			end
-			local count = tonumber(argv[2])
-			if not count then
-				count = 1
-			elseif count <= 0 then
-				return
-			end
-			local filter = data.objectType[argv[1]]
-			---@param object tes3object|tes3light
-			for object in tes3.iterateObjects(filter) do
-				if (object.name ~= "") and not object.script then
-					if filter == tes3.objectType.light then
-						if object.canCarry then tes3.addItem({ reference = ref, item = object.id, count = count, playSound = false }) end
-					else
-						tes3.addItem({ reference = ref, item = object.id, count = count, playSound = false })
-					end
-				end
-			end
-			tes3ui.log("addall %s to %s", argv[1], ref.id)
-		end,
-	},
 	["additem"] = {
 		description = "Add item(s) to the current reference's inventory",
 		arguments = { { index = 1, metavar = "id", required = true, help = "the id of the item to add" }, { index = 2, metavar = "count", required = false, help = "the add item count" } },
@@ -738,50 +706,6 @@ data.commands = {
 			end
 			tes3.addItem({ reference = ref, item = itemId, count = count, playSound = false })
 			tes3ui.log("additem %s%s to %s", count and count .. " " or "", itemId, ref.id)
-		end,
-	},
-	["addone"] = {
-		description = "Add one object of the objectType type to the current reference's inventory",
-		arguments = {
-			{ index = 1, metavar = "name", required = true, choices = data.objectTypeNames, help = "the name of the object type to add one" },
-			{ index = 2, metavar = "value", required = false, help = "the add item count" },
-		},
-		callback = function(argv)
-			local ref = data.getCurrentRef() or tes3.player
-			if not ref then return end
-			if not ref.object.inventory then
-				tes3ui.log("error: %s does not have an inventory", ref.object.name or ref.id)
-				return
-			end
-			local filter = data.objectType[argv[1]]
-			local count = tonumber(argv[2])
-			if not count then
-				count = 1
-			elseif count <= 0 then
-				return
-			end
-			---@param object tes3object|tes3light
-			for object in tes3.iterateObjects(filter) do
-				if (object.name ~= "") and not object.script then
-					if filter == tes3.objectType.light then
-						if object.canCarry then
-							tes3.addItem({ reference = ref, item = object.id, count = count, playSound = false })
-							tes3ui.log("addone %s to %s", argv[1], ref.id)
-							return
-						end
-					else
-						local function isGold(id)
-							local goldList = { ["gold_001"] = true, ["gold_005"] = true, ["gold_010"] = true, ["gold_025"] = true, ["gold_100"] = true, ["gold_dae_cursed_001"] = true, ["gold_dae_cursed_005"] = true }
-							return goldList[id]
-						end
-						if not isGold(object.id:lower()) then
-							tes3.addItem({ reference = ref, item = object.id, count = count, playSound = false })
-							tes3ui.log("addone %s to %s", argv[1], ref.id)
-							return
-						end
-					end
-				end
-			end
 		end,
 	},
 	["dupe"] = {
@@ -858,11 +782,17 @@ data.commands = {
 	},
 	["lookup"] = {
 		description = "Look up objects by id or name",
-		arguments = { { index = 1, metavar = "name", required = true, help = "the id or name of the object to look up" } },
+		arguments = {
+			{ index = 1, metavar = "name", required = true, help = "the id or name of the object to look up" },
+			{ index = 1, metavar = "objecttype", required = false, help = "the type of the object to look up" },
+		},
 		callback = function(argv)
-			local name = argv[1]:lower()
+			local objectType = getObjectType(argv[#argv])
+			if objectType then table.remove(argv, #argv) end
+			local name = argv and not table.empty(argv) and table.concat(argv, " ") or nil
+			if not name then return end
 			local lookUpObjs = {}
-			for object in tes3.iterateObjects() do
+			for object in tes3.iterateObjects(objectType) do
 				local obj = object ---@cast obj tes3object|tes3npc
 				local objId = obj.id and obj.id:lower()
 				local objName = obj.name and obj.name:lower()
