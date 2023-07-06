@@ -9,11 +9,8 @@ local console = tes3ui.registerID("MenuConsole")
 local data = {}
 local modName = "More Console Commands"
 
----@return tes3reference ref
-function data.getCurrentRef()
-	local ref = tes3ui.findMenu(console):getPropertyObject("MenuConsole_current_ref")
-	return ref
-end
+---@return tes3reference? ref
+function data.getCurrentRef() return tes3ui.getConsoleReference() end
 
 data.setNames = {
 	"agility",
@@ -311,6 +308,11 @@ data.commands = {
 	["cure"] = {
 		description = "Cure current reference of disease, blight, poison, and restore attributes and skills",
 		callback = function(argv)
+			local ref = data.getCurrentRef() or tes3.player ---@type tes3reference
+			if not ref.mobile then
+				tes3ui.log("cure: error: invalid mobile")
+				return
+			end
 			local cureCommon = tes3.getObject("Cure Common Disease Other") ---@cast cureCommon tes3spell
 			local cureBlight = tes3.getObject("Cure Blight Disease") ---@cast cureBlight tes3spell
 			local curePoison = tes3.getObject("Cure Poison Touch") ---@cast curePoison tes3spell
@@ -319,7 +321,6 @@ data.commands = {
 			local restoreSkillsMage = tes3.getObject("Almsivi Restore Mage") ---@cast restoreSkillsMage tes3spell
 			local restoreSkillsThief = tes3.getObject("Almsivi Restore Stealth") ---@cast restoreSkillsThief tes3spell
 			local restoreSkillsOther = tes3.getObject("Almsivi Restore Other") ---@cast restoreSkillsOther tes3spell
-			local ref = data.getCurrentRef() or tes3.player ---@type tes3reference
 			if ref.mobile.isDiseased then
 				tes3.applyMagicSource({ reference = ref, source = cureCommon, castChance = 100, bypassResistances = true })
 				tes3.applyMagicSource({ reference = ref, source = cureBlight, castChance = 100, bypassResistances = true })
