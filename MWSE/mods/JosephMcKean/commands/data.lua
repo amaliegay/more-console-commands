@@ -186,7 +186,23 @@ end
 
 ---@return tes3cell
 local function randomCell()
-	local cell = table.choice(tes3.dataHandler.nonDynamicData.cells)
+	local isBlacklistedRegion = { ["Abecean Sea Region"] = true }
+	---@param cell tes3cell?
+	local function isInvalidCell(cell)
+		if not cell then return true end
+		if not cell.activators.head and not cell.actors.head and not cell.statics.head then
+			log:trace("randomCell: skip cell %s", cell.editorName)
+			return true
+		end
+		if cell.isInterior then return false end
+		if not cell.region or isBlacklistedRegion[cell.region.id] then
+			log:trace("randomCell: skip cell %s", cell.editorName)
+			return true
+		end
+		return false
+	end
+	local cell ---@type tes3cell
+	while isInvalidCell(cell) do cell = table.choice(tes3.dataHandler.nonDynamicData.cells) end
 	return cell
 end
 

@@ -75,6 +75,8 @@ setownership (v1.9, requested by Markel)
     Set ownership of the current reference to none, or the specified NPC or faction with specified base ID
 unlock (v1.17)
     Unlock lock
+time (v1.19)
+    Set the current time
 weather (v1.11)
     Change the current weather immediately.
 cls (v1.9)
@@ -406,6 +408,18 @@ setownership mages guild -- Set current reference ownership to Mages Guild
 
 ```
 Usage: unlock
+```
+
+### weather - Set the current time
+
+```
+Usage: time gamehour
+
+Example:
+
+time 13:01 -- set the current time to 13:01
+time sunset -- set the current time to 18:00
+time day -- set the current time to 8:00
 ```
 
 ### weather - Change the current weather immediately to the specified weather
