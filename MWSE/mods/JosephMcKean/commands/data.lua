@@ -739,6 +739,7 @@ data.commands = {
 			if not owner then
 				tes3.setOwner({ reference = ref, remove = true })
 				tes3ui.log("Clear %s ownership", ref.id)
+				ref.modified = true
 			elseif faction then
 				tes3.setOwner({ reference = ref, owner = faction })
 				tes3ui.log("%s is now Faction Owned by %s", ref.id, faction.name)
