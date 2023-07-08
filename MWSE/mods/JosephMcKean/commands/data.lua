@@ -251,6 +251,8 @@ local function canCarry(object)
 	return false
 end
 
+data.time = { ["midnight"] = "1:00", ["sunrise"] = "6:00", ["day"] = "8:00", ["noon"] = "13:00", ["sunset"] = "18:00", ["night"] = "20:00" }
+
 ---@class command.data.argument
 ---@field index integer
 ---@field containsSpaces boolean? If the parameter can contain spaces. Only available for the first parameter
@@ -761,6 +763,21 @@ data.commands = {
 		end,
 	},
 	--- world cheats
+	["time"] = {
+		description = "Set current ingame time",
+		arguments = { { index = 1, metavar = "time", required = true, help = "the time to set, e.g. 18:23 or day/night/noon/midnight/sunrise/sunset" } },
+		callback = function(argv)
+			local time = data.time[argv[1]] or argv[1]
+			local hourStr, minuteStr = table.unpack(time:split(":"))
+			local hour, minute = tonumber(hourStr), tonumber(minuteStr)
+			if hour and minute then
+				local minuteMod = minute % 60
+				hour = hour + (minute - minuteMod) / 60
+				local hourMod = hour % 24
+				tes3.setGlobal("GameHour", hourMod + minuteMod / 60)
+			end
+		end,
+	},
 	["weather"] = {
 		description = "Set current weather",
 		aliases = { "forceweather", "fw" },
