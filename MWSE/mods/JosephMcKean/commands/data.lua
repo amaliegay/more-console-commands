@@ -269,6 +269,15 @@ end
 
 data.time = { ["midnight"] = "1:00", ["sunrise"] = "6:00", ["day"] = "8:00", ["noon"] = "13:00", ["sunset"] = "18:00", ["night"] = "20:00" }
 
+---@param obj tes3object|tes3npc|tes3cell
+---@return string type
+local function getTypeOfObject(obj)
+	local type
+	type = obj.objectType and table.find(tes3.objectType, obj.objectType)
+	type = obj.cellFlags and "cell"
+	return type
+end
+
 ---@class command.data.argument
 ---@field index integer
 ---@field containsSpaces boolean? If the parameter can contain spaces. Only available for the first parameter
@@ -833,13 +842,15 @@ data.commands = {
 				local objName = obj.name and obj.name:lower()
 				if objId:find(name) or (objName and objName:find(name)) then table.insert(lookUpObjs, obj) end
 			end
+			local nonDynamicData = tes3.dataHandler.nonDynamicData
+			for _, cell in ipairs(nonDynamicData.cells) do if cell.id:lower():find(name) then table.insert(lookUpObjs, cell) end end
 			if table.empty(lookUpObjs) then
 				tes3ui.log("No matching information")
 			else
 				tes3ui.log("%s matching information:", #lookUpObjs)
-				---@param obj tes3object|tes3npc
+				---@param obj tes3object|tes3npc|tes3cell
 				for _, obj in ipairs(lookUpObjs) do
-					local info = string.format("- %s, %s", table.find(tes3.objectType, obj.objectType), obj.id)
+					local info = string.format("- %s, %s", getTypeOfObject(obj), obj.id)
 					if obj.name then info = string.format("%s, %s", info, obj.name) end
 					local ref = tes3.getReference(obj.id)
 					if ref and ref.cell then info = string.format("%s, %s", info, ref.cell.name) end
