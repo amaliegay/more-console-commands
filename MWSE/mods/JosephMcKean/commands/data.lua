@@ -274,7 +274,7 @@ data.time = { ["midnight"] = "1:00", ["sunrise"] = "6:00", ["day"] = "8:00", ["n
 local function getTypeOfObject(obj)
 	local type
 	type = obj.objectType and table.find(tes3.objectType, obj.objectType)
-	type = obj.cellFlags and "cell"
+	type = obj.cellFlags and "cell" or type
 	return type
 end
 
@@ -639,6 +639,7 @@ data.commands = {
 			local ref = data.getCurrentRef()
 			if not ref then return end
 			tes3.setAIFollow({ reference = ref, target = tes3.player })
+			-- ref.modified = true
 		end,
 	},
 	["kill"] = {
@@ -705,6 +706,7 @@ data.commands = {
 			local ref = data.getCurrentRef()
 			if not ref then return end
 			tes3.setAIWander({ reference = ref, range = 512, idles = { 60, 20, 20, 0, 0, 0, 0, 0 } })
+			-- ref.modified = true
 		end,
 	},
 	-- item commands
@@ -850,10 +852,15 @@ data.commands = {
 				tes3ui.log("%s matching information:", #lookUpObjs)
 				---@param obj tes3object|tes3npc|tes3cell
 				for _, obj in ipairs(lookUpObjs) do
-					local info = string.format("- %s, %s", getTypeOfObject(obj), obj.id)
-					if obj.name then info = string.format("%s, %s", info, obj.name) end
+					local objType = getTypeOfObject(obj)
+					local info = string.format("- %s, %s", objType, obj.id)
+					if objType == "cell" then
+						info = string.format("%s, %s", info, obj.editorName)
+					elseif obj.name then
+						info = string.format("%s, %s", info, obj.name)
+					end
 					local ref = tes3.getReference(obj.id)
-					if ref and ref.cell then info = string.format("%s, %s", info, ref.cell.name) end
+					if ref and ref.cell then info = string.format("%s, %s", info, ref.cell.editorName) end
 					if obj.sourceMod then info = string.format("%s, %s", info, obj.sourceMod) end
 					tes3ui.log(info)
 				end
