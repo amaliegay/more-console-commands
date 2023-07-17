@@ -688,6 +688,7 @@ data.commands = {
 	},
 	["spawn"] = {
 		description = "Spawn a reference with the specified id",
+		aliases = { "summon" },
 		arguments = { { index = 1, metavar = "id", required = true, help = "the id of the reference to spawn" } },
 		callback = function(argv)
 			local id = argv and not table.empty(argv) and table.concat(argv, " ") or nil
