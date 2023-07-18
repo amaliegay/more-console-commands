@@ -841,19 +841,19 @@ data.commands = {
 				table.remove(argv, #argv)
 			end
 			local name = argv and not table.empty(argv) and table.concat(argv, " ") or nil
-			if not name then return end
+			if not isCellType and not objectType and not name then return end
 			local lookUpObjs = {}
 			if objectType then
 				for object in tes3.iterateObjects(objectType) do
 					local obj = object ---@cast obj tes3object|tes3npc
 					local objId = obj.id and obj.id:lower()
 					local objName = obj.name and obj.name:lower()
-					if objId:find(name) or (objName and objName:find(name)) then table.insert(lookUpObjs, obj) end
+					if not name or (objId:find(name) or (objName and objName:find(name))) then table.insert(lookUpObjs, obj) end
 				end
 			end
 			if isCellType then
 				local nonDynamicData = tes3.dataHandler.nonDynamicData
-				for _, cell in ipairs(nonDynamicData.cells) do if cell.id:lower():find(name) then table.insert(lookUpObjs, cell) end end
+				for _, cell in ipairs(nonDynamicData.cells) do if not name or (cell.id:lower():find(name)) then table.insert(lookUpObjs, cell) end end
 			end
 			if table.empty(lookUpObjs) then
 				tes3ui.log("No matching information")
