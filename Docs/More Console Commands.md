@@ -55,6 +55,8 @@ follow
     Make the current reference your follower.
 kill
     Kill the current reference.
+killall (v1.20.0)
+    Kill all non-essential NPCs and creatures in the current cell
 peace (v1.12)
     Pacify all the enemies. Irreversible.
 resurrect
@@ -299,6 +301,13 @@ Example:
 kill -- With a npc other than the player selected, the npc dies
 kill -- With player selected, do nothing
 kill player -- player dies
+kill all -- Kill all non-essential NPCs and creatures in the current cell
+```
+
+### killall - Kill all non-essential NPCs and creatures in the current cell
+
+```
+Usage: killall
 ```
 
 ### peace - Pacify all the enemies. Irreversible.

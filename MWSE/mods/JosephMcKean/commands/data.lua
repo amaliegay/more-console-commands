@@ -278,6 +278,15 @@ local function getTypeOfObject(obj)
 	return type
 end
 
+local function killAll()
+	for npcRef in tes3.player.cell:iterateReferences({ tes3.objectType.npc, tes3.objectType.creature }) do
+		if not npcRef.object.isEssential then
+			local mobileNPC = npcRef.mobile ---@cast mobileNPC tes3mobileNPC
+			mobileNPC:kill()
+		end
+	end
+end
+
 ---@class command.data.argument
 ---@field index integer
 ---@field containsSpaces boolean? If the parameter can contain spaces. Only available for the first parameter
@@ -656,9 +665,12 @@ data.commands = {
 				end
 			elseif argv[1] == "player" then
 				tes3.mobilePlayer:kill()
+			elseif argv[1] == "all" then
+				killAll()
 			end
 		end,
 	},
+	["killall"] = { description = "Kills all non-essential NPCs and creatures within the cell the player is currently in", callback = function(argv) killAll() end },
 	["peace"] = {
 		description = "Pacify all enemies. Irreversible",
 		callback = function(argv)
@@ -788,6 +800,14 @@ data.commands = {
 			local ref = data.getCurrentRef()
 			if not ref then return end
 			tes3.unlock({ reference = ref })
+		end,
+	},
+	["untrap"] = {
+		description = "Untrap trap",
+		callback = function(argv)
+			local ref = data.getCurrentRef()
+			if not ref or not ref.lockNode or not ref.lockNode.trap then return end
+			ref.lockNode.trap = nil
 		end,
 	},
 	--- world cheats
