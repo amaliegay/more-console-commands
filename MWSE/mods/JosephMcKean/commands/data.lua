@@ -675,6 +675,16 @@ data.commands = {
 		end,
 	},
 	["killall"] = { description = "Kills all non-essential NPCs and creatures within the cell the player is currently in", callback = function(argv) killAll() end },
+	["paralyze"] = {
+		description = "Paralyze or unparalyze the current reference",
+		callback = function(argv)
+			local ref = data.getCurrentRef()
+			if ref and ref.mobile then
+				ref.mobile.paralyze = (ref.mobile.paralyze == 0) and 1 or 0
+				tes3ui.log("%s Paralyzed -> %s", ref.id, (ref.mobile.paralyze == 0) and "False" or "True")
+			end
+		end,
+	},
 	["peace"] = {
 		description = "Pacify all enemies. Irreversible",
 		callback = function(argv)
