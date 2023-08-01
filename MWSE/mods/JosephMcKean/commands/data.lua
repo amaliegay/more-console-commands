@@ -595,8 +595,8 @@ data.commands = {
 				if ref and ref.baseObject.objectType == tes3.objectType.npc then
 					tes3.positionCell({
 						cell = ref.cell,
-						position = { ref.position.x - 64, ref.position.y + 64, ref.position.z },
-						orientation = { ref.orientation.x, ref.orientation.y, ref.orientation.z + math.pi },
+						position = tes3vector3.new(ref.position.x - 64, ref.position.y + 64, ref.position.z),
+						orientation = tes3vector3.new(ref.orientation.x, ref.orientation.y, ref.orientation.z + math.pi),
 					})
 				end
 			end
@@ -614,12 +614,16 @@ data.commands = {
 					if mark.cell then
 						tes3.positionCell({
 							cell = tes3.getCell({ id = mark.cell }),
-							position = { mark.position.x, mark.position.y, mark.position.z },
-							orientation = { mark.orientation.x, mark.orientation.y, mark.orientation.z },
+							position = tes3vector3.new(mark.position.x, mark.position.y, mark.position.z),
+							orientation = tes3vector3.new(mark.orientation.x, mark.orientation.y, mark.orientation.z),
 							forceCellChange = true,
 						})
 					else
-						tes3.positionCell({ position = { mark.position.x, mark.position.y, mark.position.z }, orientation = { mark.orientation.x, mark.orientation.y }, forceCellChange = true })
+						tes3.positionCell({
+							position = tes3vector3.new(mark.position.x, mark.position.y, mark.position.z),
+							orientation = tes3vector3.new(mark.orientation.x, mark.orientation.y),
+							forceCellChange = true,
+						})
 					end
 				end
 			end
@@ -779,6 +783,7 @@ data.commands = {
 			if not (npc and npc.objectType == tes3.objectType.npc) then npc = nil end
 			---@cast npc tes3npc?
 			if not owner then
+				---@diagnostic disable-next-line: missing-fields
 				tes3.setOwner({ reference = ref, remove = true })
 				tes3ui.log("Clear %s ownership", ref.id)
 				ref.modified = true
@@ -817,8 +822,8 @@ data.commands = {
 		callback = function(argv)
 			local time = data.time[argv[1]] or argv[1]
 			local hourStr, minuteStr = table.unpack(time:split(":"))
-			local hour, minute = tonumber(hourStr), tonumber(minuteStr)
-			if hour and minute then
+			local hour, minute = tonumber(hourStr), tonumber(minuteStr) or 0
+			if hour then
 				local minuteMod = minute % 60
 				hour = hour + (minute - minuteMod) / 60
 				local hourMod = hour % 24
