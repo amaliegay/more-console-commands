@@ -1,10 +1,9 @@
-- [ ] wood 100
-- [ ] add wood 100
-- [ ] help
-- [ ] copy (soul gem)
-- [ ] additem corkbulb_root 100
 - [ ] levelup marksman 100
 - [ ] set marksman to 100 on PlayerSaveGame
+- [ ] copy (soul gem)
+- [ ] additem corkbulb_root 100
+- [ ] add wood 100
+- [ ] wood 100
 - [ ] summon alias for spawn (minecraft)
 - [ ] did you mean: urshilaku, sutra burial (instead of urshilaku, suutra burial, added letter)
 - [ ] did you mean: sadrith mora, madeilde raran's house (instead of madelide, swapping letter)

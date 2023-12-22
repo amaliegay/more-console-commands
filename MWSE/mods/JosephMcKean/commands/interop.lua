@@ -3,9 +3,6 @@ local interop = {}
 
 interop.data = require("JosephMcKean.commands.data")
 
----@return tes3reference ref
-interop.getCurrentRef = interop.data.getCurrentRef
-
 ---@param commandsData command.data[]
 function interop.registerCommands(commandsData) for _, command in ipairs(commandsData) do interop.registerCommand(command) end end
 
@@ -18,6 +15,9 @@ function interop.run(command)
 	event.trigger("UIEXP:consoleCommand", { command = command, context = context }, { filter = context })
 end
 
+---@return table<string, command> commands
+function interop.getCommands() return interop.data.commands end
+
 return interop
 
 --[[
@@ -29,19 +29,20 @@ return interop
 		return
 	end
 
-	command.registerCommands({
-		{
-			name = "killall",
-			description = "Kills all non-essential NPCs within the cell the player is currently in",
-			callback = function(argv)
-				for npcRef in tes3.player.cell:iterateReferences(tes3.objectType.npc) do
-					if not npcRef.object.isEssential then
-						local mobileNPC = npcRef.mobile ---@cast mobileNPC tes3mobileNPC
-						mobileNPC:kill()
+	event.register("command:register", function()
+		command.registerCommands({
+			{
+				name = "killall",
+				description = "Kills all non-essential NPCs within the cell the player is currently in",
+				callback = function(argv)
+					for npcRef in tes3.player.cell:iterateReferences(tes3.objectType.npc) do
+						if not npcRef.object.isEssential then
+							local mobileNPC = npcRef.mobile ---@cast mobileNPC tes3mobileNPC
+							mobileNPC:kill()
+						end
 					end
-				end
-			end,
-		},
-	})
-
+				end,
+			},
+		})
+	end)
 ]]

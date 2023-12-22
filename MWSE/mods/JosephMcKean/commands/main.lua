@@ -1,5 +1,8 @@
-local config = require("JosephMcKean.commands.config")
-local log = require("logging.logger").new({ name = "More Console Commands - main", logLevel = config.logLevel })
+local utils = include("JosephMcKean.lib.utils")
+
+local mod = require("JosephMcKean.commands")
+local config = mod.config
+local log = mod:log("main")
 log:info("initializing")
 
 local didYouMean = require("JosephmcKean.commands.didYouMean")
@@ -141,11 +144,27 @@ local function parseCommands(e)
 	e.block = true
 end
 
+---@param functionName string
+---@param commandData command
+local function registerAliases(functionName, commandData) if commandData.aliases then for _, alias in ipairs(commandData.aliases) do data.aliases[alias] = functionName end end end
+
+local function registerCommands()
+	local commandsDirectory = "Data Files/MWSE/mods/JosephMcKean/commands/commands/"
+	utils.executeAllLuaFilesIn(commandsDirectory)
+end
+
 event.register("initialized", function()
+	log:debug("registering commands")
+	registerCommands()
 	event.trigger("command:register")
-	for functionName, commandData in pairs(data.commands) do if commandData.aliases then for _, alias in ipairs(commandData.aliases) do data.aliases[alias] = functionName end end end
+	local commands = data.commands ---@type table<string, command>
+	for functionName, commandData in pairs(commands) do
+		log:debug("command %s registered", functionName)
+		registerAliases(functionName, commandData)
+	end
 	event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole", priority = -9999 })
 	event.register("UIEXP:consoleCommand", parseCommands)
+	log:info("initialized")
 end, { priority = -999 })
 
 event.register("UIEXP:sandboxConsole", function(e) e.sandbox.command = require("JosephMcKean.commands.interop") end)
@@ -168,7 +187,7 @@ local function registerModConfig()
 		"For example, if nothing is selected, you type and enter money 420, the player will get 420 gold. But if fargoth is selected, fargoth will get the money instead.",
 	})
 	info:createInfo({ text = "\nMore detailed documentation see Docs\\More Console Commands.md or \nNexusmods page:\n" })
-	info:createHyperlink{ text = "https://www.nexusmods.com/morrowind/mods/52500", exec = "https://www.nexusmods.com/morrowind/mods/52500" }
+	info:createHyperlink({ text = "https://www.nexusmods.com/morrowind/mods/52500", url = "https://www.nexusmods.com/morrowind/mods/52500" })
 
 	mwse.mcm.register(template)
 end
