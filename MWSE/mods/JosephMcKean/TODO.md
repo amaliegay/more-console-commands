@@ -1,0 +1,37 @@
+- [ ] Auto Equip Next Weapon
+- [ ] Commands: summon alias for spawn (minecraft)
+- [ ] Commands: hotkey binding for commands
+- [ ] FC: add all in Massama, Picks-The-Leaves: Alchemist
+- [ ] Commands: rotate 90
+- [ ] Commands: teleport/tp command (minecraft)
+- [ ] FC: all Llothanis (33, 10)
+- [ ] FC: add releastic repair work station
+- [ ] FC: sit on cushions
+- [ ] FC: add Immersive Enchanting/Alchemy tables
+- [ ] Commands: paralyze
+- [ ] Commands: additem support add crafting framework materials
+- [ ] Commands: did you mean: sadrith mora, madeilde raran's house (instead of madelide, swapping letter)
+- [ ] Commands: swap the currentRef with tes3ui.getConsoleReference
+- [ ] FC: add all dave humprey furniture alternative?
+- [ ] Commands: lookup ilunibi not working because cell not object?
+- [ ] FC: add all Old Ebonheart, Merxia Vendicci's Manor
+- [ ] Archery: expand headshot to creatures
+- [ ] FC: make Purchase Another option the last button before cancel
+- [ ] Commands: did you mean: urshilaku, sutra burial (instead of urshilaku, suutra burial, added letter)
+- [ ] Commands: repair command
+- [ ] FC: add all Almalexia Chamber
+- [ ] Commands: auto complete additem and coc check Safebox
+- [ ] Commands: untrap command
+- [ ] FC: add Tel Eurus furniture
+- [ ] Commands: position command should cover unique creature for example dagoth vemyn
+- [ ] FC: add all Indal-ruhn, Ienas Urelen's Shack
+- [ ] Commands: lookup beggar's nose not working because spellmaking not object?
+- [ ] Commands: did you mean: mournhold (instead of mourhold, missing letter)
+- [ ] Commands: fov command
+- [ ] FC: change the water button to "Use"
+- [ ] FC: MCA incompatibility, asked merlord, waiting for reply
+- [ ] mcc: resting is illegal
+- [ ] Commands: setownership all
+- [ ] Commands: refactor the containsSpaces field, argPattern: s, n, sn, nn, nil
+- [ ] The description indicates that the popup shows when you're equipping something soul-trap related, could you add another check for if the current target is already affected by soul trap so it stays up if you switch weapons and/or spells?
+- [ ] FC: animal trophy ids provided by glisp on discord FC thread

@@ -1,0 +1,29 @@
+- [ ] wood 100
+- [ ] add wood 100
+- [ ] help
+- [ ] copy (soul gem)
+- [ ] additem corkbulb_root 100
+- [ ] levelup marksman 100
+- [ ] set marksman to 100 on PlayerSaveGame
+- [ ] summon alias for spawn (minecraft)
+- [ ] did you mean: urshilaku, sutra burial (instead of urshilaku, suutra burial, added letter)
+- [ ] did you mean: sadrith mora, madeilde raran's house (instead of madelide, swapping letter)
+- [ ] did you mean: mournhold (instead of mourhold, missing letter)
+- [ ] fov command
+- [ ] lookup ilunibi not working because cell not object?
+- [ ] lookup beggar's nose not working because spellmaking not object?
+- [ ] rotate 90
+- [ ] hotkey binding for commands
+- [ ] setownership bug (ref.modified = true)
+- [ ] auto complete additem and coc check Safebox
+- [ ] position command should cover unique creature for example dagoth vemyn
+- [ ] additem support add crafting framework materials
+- [ ] setownership all
+- [ ] time command (minecraft)
+- [ ] teleport/tp command (minecraft)
+- [ ] swap the currentRef with tes3ui.getConsoleReference
+- [ ] refactor the containsSpaces field, argPattern: s, n, sn, nn, nil
+- [ ] repair command
+- [ ] lookup tel vos bug
+- [ ] coc 14, -14 cellid not found
+- [ ] additem aa_random "aa_random not carryable"
