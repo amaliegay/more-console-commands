@@ -70,13 +70,18 @@ event.register("command:register", function()
 				local ref = tes3ui.getConsoleReference()
 				if not ref then return end
 				local item = ref.baseObject
-				if not canCarry(item) then
+				local count = tonumber(argv[1])
+				local soul = ref.itemData and ref.itemData.soul
+				if soul then
+					tes3.addItem({ reference = tes3.player, item = item.id, soul = soul, playSound = false })
+					tes3ui.log("additem %s (%s) to player", item.id, soul.id)
+				elseif not canCarry(item) then
 					tes3ui.log("error: %s is not carryable", item.name or ref.id)
 					return
+				else
+					tes3.addItem({ reference = tes3.player, item = item.id, count = count or 1, playSound = false })
+					tes3ui.log("additem %s%s to player", count and count .. " " or "", item.id)
 				end
-				local count = tonumber(argv[1])
-				tes3.addItem({ reference = tes3.player, item = item.id, count = count or 1, playSound = false })
-				tes3ui.log("additem %s%s to player", count and count .. " " or "", item.id)
 			end,
 		},
 	})
