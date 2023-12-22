@@ -6,63 +6,6 @@ local didYouMean = require("JosephmcKean.commands.didYouMean")
 local console = tes3ui.registerID("MenuConsole")
 local data = {}
 
-data.setNames = {
-	"agility",
-	"endurance",
-	"intelligence",
-	"luck",
-	"personality",
-	"speed",
-	"strength",
-	"willpower",
-	"acrobatics",
-	"alchemy",
-	"alteration",
-	"armorer",
-	"athletics",
-	"axe",
-	"block",
-	"bluntweapon",
-	"conjuration",
-	"destruction",
-	"enchant",
-	"handtohand",
-	"heavyarmor",
-	"illusion",
-	"lightarmor",
-	"longblade",
-	"marksman",
-	"mediumarmor",
-	"mercantile",
-	"mysticism",
-	"restoration",
-	"security",
-	"shortblade",
-	"sneak",
-	"spear",
-	"speechcraft",
-	"unarmored",
-	"health",
-	"magicka",
-	"fatigue",
-}
-
----@param name string
----@return string?
-local function getName(name)
-	local camelCased = {
-		["mediumarmor"] = "mediumArmor",
-		["heavyarmor"] = "heavyArmor",
-		["bluntweapon"] = "bluntWeapon",
-		["longblade"] = "longBlade",
-		["lightarmor"] = "lightArmor",
-		["shortblade"] = "shortBlade",
-		["handtohand"] = "handToHand",
-	}
-	name = camelCased[name] or name
-	return name
-end
-
 local function listMarks()
 	if not table.empty(config.marks) then
 		tes3ui.log("\nHere is a list of marks that are available:")
@@ -312,35 +255,6 @@ data.commands = {
 			end
 			faction.playerJoined = true
 			faction.playerRank = rank or 0
-		end,
-	},
-	["max"] = {
-		description = "Set the current reference's all attributes and skills base value to the input value",
-		arguments = { { index = 1, metavar = "value", required = false, help = "the value to set" } },
-		callback = function(argv)
-			local ref = tes3ui.getConsoleReference() or tes3.player
-			if not ref then return end
-			local value = tonumber(argv[1]) or 200
-			for _, name in ipairs(data.setNames) do tes3.setStatistic({ reference = tes3.player, name = getName(name), value = value }) end
-		end,
-	},
-	["set"] = {
-		description = "Set the current reference's attribute or skill base value",
-		arguments = {
-			{ index = 1, metavar = "name", required = true, choices = data.setNames, help = "the name of the attribute or skill to set", didYouMean = true },
-			{ index = 2, metavar = "value", required = true, help = "the value to set" },
-		},
-		callback = function(argv)
-			local ref = tes3ui.getConsoleReference() or tes3.player
-			if not ref then return end
-			if not ref.mobile then
-				tes3ui.log("set: error: currentRef has no mobile.")
-				return
-			end
-			local name = getName(argv[1])
-			log:trace("set: name = %s", name)
-			tes3.setStatistic({ reference = ref, name = name, value = tonumber(argv[2]) })
-			tes3ui.log("Set %s on %s", name, ref.id)
 		end,
 	},
 	["skills"] = {

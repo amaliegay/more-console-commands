@@ -1,5 +1,3 @@
-- [ ] levelup marksman 100
-- [ ] set marksman to 100 on PlayerSaveGame
 - [ ] copy (soul gem)
 - [ ] additem corkbulb_root 100
 - [ ] add wood 100
