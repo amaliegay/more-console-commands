@@ -35,9 +35,18 @@ local uiids = {
 	xyzBlock = tes3ui.registerID("MenuMulti_DebugScreen_L_XYZ_b"),
 	cell = tes3ui.registerID("MenuMulti_DebugScreen_L_cell"),
 	cellBlock = tes3ui.registerID("MenuMulti_DebugScreen_L_cell_b"),
+	facing = tes3ui.registerID("MenuMulti_DebugScreen_L_facing"),
+	region = tes3ui.registerID("MenuMulti_DebugScreen_L_region"),
 	separator = tes3ui.registerID("MenuMulti_DebugScreen_separator"),
 	mem = tes3ui.registerID("MenuMulti_DebugScreen_R_mem"),
 	memBlock = tes3ui.registerID("MenuMulti_DebugScreen_R_mem_b"),
+	targetedReference = tes3ui.registerID("MenuMulti_DebugScreen_R_targetedRef"),
+	targetRef = tes3ui.registerID("MenuMulti_DebugScreen_R_targetRef"),
+	targetBase = tes3ui.registerID("MenuMulti_DebugScreen_R_targetBase"),
+	targetPos = tes3ui.registerID("MenuMulti_DebugScreen_R_targetPos"),
+	hair = tes3ui.registerID("MenuMulti_DebugScreen_R_targetHair"),
+	head = tes3ui.registerID("MenuMulti_DebugScreen_R_targetHead"),
+	fight = tes3ui.registerID("MenuMulti_DebugScreen_R_fight"),
 }
 
 ---@class debugScreen.temp
@@ -50,7 +59,23 @@ local temp = {
 	leftBlock = nil,
 	---@type tes3uiElement
 	rightBlock = nil,
+	---@type tes3reference?
+	targetedReference = nil,
+	---@type number
+	fps = nil,
 }
+
+local function calcFPSTimer()
+	timer.start({
+		duration = 0.25,
+		callback = function()
+			temp.fps = temp.fps or (1 / tes3.worldController.deltaTime)
+			temp.fps = temp.fps * 0.9 + (1 / tes3.worldController.deltaTime) * 0.1
+		end,
+		iterations = -1,
+		type = timer.real,
+	})
+end
 
 ---@class debugScreen.debugInfo
 ---@field id string
@@ -61,7 +86,7 @@ local temp = {
 ---@type debugScreen.debugInfo[]
 local leftDebugInfo = {
 	{ id = "Version", uiid = uiids.version, uiidBlock = uiids.versionBlock, text = string.format("Morrowind Script Extender %s (built %s)", mwse.buildNumber, mwse.buildDate) },
-	{ id = "fps", uiid = uiids.fps, uiidBlock = uiids.fpsBlock, text = function() return "fps" end },
+	{ id = "fps", uiid = uiids.fps, uiidBlock = uiids.fpsBlock, text = function() return string.format("%d fps Draw Distance: %d", temp.fps, mge.distantLandRenderConfig.drawDistance) end },
 	{ id = "separator", uiid = uiids.separator, text = "" },
 	{
 		id = "XYZ",
@@ -73,6 +98,18 @@ local leftDebugInfo = {
 		end,
 	},
 	{
+		id = "Facing",
+		uiid = uiids.facing,
+		text = function()
+			local rotation = tes3.getCameraVector()
+			local xyProjection = tes3vector2.new(rotation.x, rotation.y):normalized()
+			local horizontalRotation = math.deg(math.atan2(xyProjection.y, xyProjection.x))
+			local zSign = math.abs(rotation.z) / rotation.z
+			local verticalRotation = math.deg(tes3vector3.new(rotation.x, rotation.y, 0):angle(rotation) * zSign)
+			return string.format("Facing: %.3f (h) / %.3f (v)", horizontalRotation, verticalRotation)
+		end,
+	},
+	{
 		id = "Cell",
 		uiid = uiids.cell,
 		uiidBlock = uiids.cellBlock,
@@ -81,6 +118,7 @@ local leftDebugInfo = {
 			return string.format("Cell: %s", cell.editorName)
 		end,
 	},
+	{ id = "Region", uiid = uiids.region, text = function() return string.format("Region: %s", tes3.getRegion() or "nil") end },
 }
 ---@type debugScreen.debugInfo[]
 local rightDebugInfo = {
@@ -92,6 +130,101 @@ local rightDebugInfo = {
 			local memoryUsageInMB = mwse.getVirtualMemoryUsage() / 1024 / 1024
 			local maxMemoryUsage = 4096
 			return string.format("Mem: %d%% %d/%dMB", memoryUsageInMB / maxMemoryUsage * 100, memoryUsageInMB, maxMemoryUsage)
+		end,
+	},
+	{ id = "separator", uiid = uiids.separator, text = "" },
+	{
+		id = "targetedReference",
+		uiid = uiids.targetedReference,
+		text = function()
+			local result = tes3.rayTest({ position = tes3.getPlayerEyePosition(), direction = tes3.getPlayerEyeVector(), ignore = { tes3.player } })
+			temp.targetedReference = result and result.reference
+			if temp.targetedReference then
+				local position = temp.targetedReference.position
+				return string.format("Targeted Reference: %.3f, %.3f, %.3f", position.x, position.y, position.z)
+			else
+				return "Targeted Reference: nil"
+			end
+		end,
+	},
+	{
+		id = "targetRef",
+		uiid = uiids.targetRef,
+		text = function()
+			if temp.targetedReference then
+				if temp.targetedReference.sourceMod then
+					temp.refSource = temp.targetedReference.sourceMod .. ":" .. temp.targetedReference.id
+					return temp.refSource
+				else
+					temp.refSource = temp.targetedReference.id
+					return temp.refSource
+				end
+			else
+				return ""
+			end
+		end,
+	},
+	{
+		id = "targetBase",
+		uiid = uiids.targetBase,
+		text = function()
+			if temp.targetedReference then
+				local baseObject = temp.targetedReference.baseObject
+				if baseObject.sourceMod then
+					local baseSource = baseObject.sourceMod .. ":" .. baseObject.id
+					return (baseSource == temp.refSource) and "" or baseSource
+				else
+					local baseSource = baseObject.id
+					return (baseSource == temp.refSource) and "" or baseSource
+				end
+			else
+				return ""
+			end
+		end,
+	},
+	{
+		id = "hair",
+		uiid = uiids.hair,
+		text = function()
+			if temp.targetedReference then
+				local bodyPartManager = temp.targetedReference.bodyPartManager
+				if bodyPartManager then
+					local hair = bodyPartManager:getActiveBodyPart(tes3.activeBodyPartLayer.base, tes3.activeBodyPart.hair).bodyPart
+					if hair then
+						local hairSource = hair.sourceMod .. ":" .. hair.id
+						return hairSource
+					end
+				end
+			end
+			return ""
+		end,
+	},
+	{
+		id = "head",
+		uiid = uiids.head,
+		text = function()
+			if temp.targetedReference then
+				local bodyPartManager = temp.targetedReference.bodyPartManager
+				if bodyPartManager then
+					local head = bodyPartManager:getActiveBodyPart(tes3.activeBodyPartLayer.base, tes3.activeBodyPart.head).bodyPart
+					if head then
+						local headSource = head.sourceMod .. ":" .. head.id
+						return headSource
+					end
+				end
+			end
+			return ""
+		end,
+	},
+	{
+		id = "fight",
+		uiid = uiids.fight,
+		text = function()
+			if temp.targetedReference then
+				local mobile = temp.targetedReference.mobile
+				if mobile then if mobile.fight then return string.format("Fight: %s", mobile.fight) end end
+			end
+			return ""
 		end,
 	},
 }
@@ -124,11 +257,6 @@ local function createDebugInfo(block, leftOrRight)
 	local isLeft = leftOrRight == "left"
 	for _, debugInfo in ipairs(isLeft and leftDebugInfo or rightDebugInfo) do
 		if debugInfo.id ~= "separator" then
-			-- local background = block:createRect({ id = debugInfo.uiidBlock })
-			-- background.color = tes3ui.getPalette(tes3.palette.journalFinishedQuestColor)
-			-- background.alpha = 0.5
-			-- background.autoWidth, background.autoHeight = true, true
-			-- local label = background:createLabel({ id = debugInfo.uiid })
 			local label = block:createLabel({ id = debugInfo.uiid })
 			local text = debugInfo.text
 			if type(text) == "function" then
@@ -203,5 +331,6 @@ end
 
 event.register(tes3.event.initialized, function()
 	log:info("initialized!")
+	event.register(tes3.event.loaded, calcFPSTimer)
 	event.register(tes3.event.keyDown, keyDown)
 end)
