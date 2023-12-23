@@ -165,7 +165,8 @@ end
 
 ---@class command.data
 ---@field name string The name of the command
----@field description string The description of the command
+---@field description string? The description of the command
+---@field hidden boolean?
 ---@field aliases string[]?
 ---@field arguments command.data.argument[]?
 ---@field callback fun(argv:string[]) The callback function
@@ -177,6 +178,7 @@ local command = {
 		name = "Command",
 		fields = {
 			description = { type = "string", required = true },
+			hidden = { type = "boolean", required = false },
 			aliases = { type = "table", required = false },
 			arguments = { type = "table", required = false },
 			callback = { type = "function", required = true },

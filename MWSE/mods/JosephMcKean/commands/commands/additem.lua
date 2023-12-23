@@ -1,4 +1,4 @@
-local registerCommands = require("JosephMcKean.commands.interop").registerCommands
+local registerCommand = require("JosephMcKean.commands.interop").registerCommand
 
 local itemAliases = {
 	["wood"] = "ashfall_firewood",
@@ -42,67 +42,81 @@ local function canCarry(object)
 	return false
 end
 
+---@param ref tes3reference
+---@param itemId string
+---@param count integer
+local function addItem(ref, itemId, count)
+	if itemAliases[itemId] then itemId = itemAliases[itemId] end
+	local item = tes3.getObject(itemId) ---@cast item tes3object|any
+	if not item then
+		local ingredId = "ingred_" .. itemId .. "_01"
+		local ingred = tes3.getObject(ingredId)
+		if ingred then
+			itemId = ingredId
+			item = ingred
+		else
+			tes3ui.log("additem: error: itemId %s not found", itemId)
+			return
+		end
+	end
+	if not canCarry(item) then
+		tes3ui.log("error: %s is not carryable", item.id)
+		return
+	end
+	tes3.addItem({ reference = ref, item = itemId, count = count, playSound = false })
+	tes3ui.log("additem %s%s to %s", count and count .. " " or "", itemId, ref.id)
+end
+
+local function dupe(count)
+	local ref = tes3ui.getConsoleReference()
+	if not ref then return end
+	local item = ref.baseObject
+	local soul = ref.itemData and ref.itemData.soul
+	if soul then
+		tes3.addItem({ reference = tes3.player, item = item.id, soul = soul, playSound = false })
+		tes3ui.log("additem %s (%s) to player", item.id, soul.id)
+	elseif not canCarry(item) then
+		tes3ui.log("error: %s is not carryable", item.name or ref.id)
+		return
+	else
+		tes3.addItem({ reference = tes3.player, item = item.id, count = count or 1, playSound = false })
+		tes3ui.log("additem %s%s to player", count and count .. " " or "", item.id)
+	end
+end
+
 event.register("command:register", function()
-	registerCommands({
-		{
-			name = "additem",
-			aliases = { "add" },
-			description = "Add item(s) to the current reference's inventory",
-			arguments = { { index = 1, metavar = "id", required = true, help = "the id of the item to add" }, { index = 2, metavar = "count", required = false, help = "the add item count" } },
-			callback = function(argv)
-				local ref = tes3ui.getConsoleReference() or tes3.player
-				if not ref then return end
-				if not ref.object.inventory then
-					tes3ui.log("error: %s does not have an inventory", ref.object.name or ref.id)
-					return
-				end
-				local count = tonumber(argv[#argv])
-				if count then table.remove(argv, #argv) end
-				local itemId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
-				if not itemId then return end
-				if itemAliases[itemId] then itemId = itemAliases[itemId] end -- this is a quick and temporary solution, i plan to support crafting framework material
-				local item = tes3.getObject(itemId) ---@cast item tes3object|any
-				if not item then
-					local ingredId = "ingred_" .. itemId .. "_01"
-					local ingred = tes3.getObject(ingredId)
-					if ingred then
-						itemId = ingredId
-						item = ingred
-					else
-						tes3ui.log("additem: error: itemId %s not found", itemId)
-						return
-					end
-				end
-				if not canCarry(item) then
-					tes3ui.log("error: %s is not carryable", item.id)
-					return
-				end
-				tes3.addItem({ reference = ref, item = itemId, count = count, playSound = false })
-				tes3ui.log("additem %s%s to %s", count and count .. " " or "", itemId, ref.id)
-			end,
-		},
-		{
-			name = "dupe",
-			aliases = { "copy" },
-			description = "Duplicate the item that is the current reference to the player's inventory",
-			arguments = { { index = 1, metavar = "count", required = false, help = "the count of the item to duplicate" } },
-			callback = function(argv)
-				local ref = tes3ui.getConsoleReference()
-				if not ref then return end
-				local item = ref.baseObject
-				local count = tonumber(argv[1])
-				local soul = ref.itemData and ref.itemData.soul
-				if soul then
-					tes3.addItem({ reference = tes3.player, item = item.id, soul = soul, playSound = false })
-					tes3ui.log("additem %s (%s) to player", item.id, soul.id)
-				elseif not canCarry(item) then
-					tes3ui.log("error: %s is not carryable", item.name or ref.id)
-					return
-				else
-					tes3.addItem({ reference = tes3.player, item = item.id, count = count or 1, playSound = false })
-					tes3ui.log("additem %s%s to player", count and count .. " " or "", item.id)
-				end
-			end,
-		},
+	registerCommand({
+		name = "additem",
+		aliases = { "add" },
+		description = "Add item(s) to the current reference's inventory",
+		arguments = { { index = 1, metavar = "id", required = true, help = "the id of the item to add" }, { index = 2, metavar = "count", required = false, help = "the add item count" } },
+		callback = function(argv)
+			local ref = tes3ui.getConsoleReference() or tes3.player
+			if not ref then return end
+			if not ref.object.inventory then
+				tes3ui.log("error: %s does not have an inventory", ref.object.name or ref.id)
+				return
+			end
+			local count = tonumber(argv[#argv])
+			if count then table.remove(argv, #argv) end
+			local itemId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
+			if not itemId then return end
+			addItem(ref, itemId, count)
+		end,
 	})
+	registerCommand({
+		name = "dupe",
+		aliases = { "copy" },
+		description = "Duplicate the item that is the current reference to the player's inventory",
+		arguments = { { index = 1, metavar = "count", required = false, help = "the count of the item to duplicate" } },
+		callback = function(argv) dupe(tonumber(argv[1])) end,
+	})
+	for alias, itemId in pairs(itemAliases) do
+		registerCommand({
+			name = alias,
+			hidden = true,
+			arguments = { { index = 1, metavar = "count", required = true, help = "the count of the item to add" } },
+			callback = function(argv) addItem(tes3.player, itemId, tonumber(argv[1])) end,
+		})
+	end
 end)

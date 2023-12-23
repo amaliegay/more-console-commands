@@ -1,4 +1,3 @@
-- [ ] wood 100
 - [ ] summon alias for spawn (minecraft)
 - [ ] did you mean: urshilaku, sutra burial (instead of urshilaku, suutra burial, added letter)
 - [ ] did you mean: sadrith mora, madeilde raran's house (instead of madelide, swapping letter)
