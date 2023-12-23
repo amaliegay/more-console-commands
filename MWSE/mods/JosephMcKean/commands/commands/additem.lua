@@ -60,14 +60,12 @@ event.register("command:register", function()
 				if count then table.remove(argv, #argv) end
 				local itemId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
 				if not itemId then return end
-				if itemAliases[itemId] then 
-					itemId = itemAliases[itemId]
-				end -- this is a quick and temporary solution, i plan to support crafting framework material
+				if itemAliases[itemId] then itemId = itemAliases[itemId] end -- this is a quick and temporary solution, i plan to support crafting framework material
 				local item = tes3.getObject(itemId) ---@cast item tes3object|any
 				if not item then
 					local ingredId = "ingred_" .. itemId .. "_01"
 					local ingred = tes3.getObject(ingredId)
-					if ingred then 
+					if ingred then
 						itemId = ingredId
 						item = ingred
 					else
