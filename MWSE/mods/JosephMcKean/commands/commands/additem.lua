@@ -34,6 +34,7 @@ event.register("command:register", function()
 	registerCommands({
 		{
 			name = "additem",
+			aliases = { "add" },
 			description = "Add item(s) to the current reference's inventory",
 			arguments = { { index = 1, metavar = "id", required = true, help = "the id of the item to add" }, { index = 2, metavar = "count", required = false, help = "the add item count" } },
 			callback = function(argv)
