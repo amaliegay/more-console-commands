@@ -47,11 +47,20 @@ event.register("command:register", function()
 				if count then table.remove(argv, #argv) end
 				local itemId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
 				if not itemId then return end
-				if didYouMean[itemId] then itemId = didYouMean[itemId] end -- this is a quick and temporary solution, i plan to support crafting framework material
+				if didYouMean[itemId] then 
+					itemId = didYouMean[itemId]
+				end -- this is a quick and temporary solution, i plan to support crafting framework material
 				local item = tes3.getObject(itemId) ---@cast item tes3object|any
 				if not item then
-					tes3ui.log("additem: error: itemId %s not found", itemId)
-					return
+					local ingredId = "ingred_" .. itemId .. "_01"
+					local ingred = tes3.getObject(ingredId)
+					if ingred then 
+						itemId = ingredId
+						item = ingred
+					else
+						tes3ui.log("additem: error: itemId %s not found", itemId)
+						return
+					end
 				end
 				if not canCarry(item) then
 					tes3ui.log("error: %s is not carryable", item.id)
