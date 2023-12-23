@@ -1,4 +1,3 @@
-- [ ] additem corkbulb_root 100
 - [ ] add wood 100
 - [ ] wood 100
 - [ ] summon alias for spawn (minecraft)
