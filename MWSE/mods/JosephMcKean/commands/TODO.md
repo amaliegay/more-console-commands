@@ -1,4 +1,3 @@
-- [ ] add wood 100
 - [ ] wood 100
 - [ ] summon alias for spawn (minecraft)
 - [ ] did you mean: urshilaku, sutra burial (instead of urshilaku, suutra burial, added letter)
