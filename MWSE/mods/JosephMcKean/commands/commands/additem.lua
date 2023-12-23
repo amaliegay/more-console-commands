@@ -1,5 +1,17 @@
 local registerCommands = require("JosephMcKean.commands.interop").registerCommands
-local didYouMean = require("JosephmcKean.commands.didYouMean")
+
+local itemAliases = {
+	["wood"] = "ashfall_firewood",
+	["resin"] = "ingred_resin_01",
+	["stone"] = "ashfall_stone",
+	["fibre"] = "ashfall_plant_fibre",
+	["rope"] = "ashfall_rope",
+	["straw"] = "ashfall_straw",
+	["fabric"] = "ashfall_fabric",
+	["flint"] = "ashfall_flint",
+	["coal"] = "ashfall_ingred_coal_01",
+	["leather"] = "ashfall_leather",
+}
 
 local canCarryObjectType = {
 	["alchemy"] = tes3.objectType.alchemy,
@@ -48,8 +60,8 @@ event.register("command:register", function()
 				if count then table.remove(argv, #argv) end
 				local itemId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
 				if not itemId then return end
-				if didYouMean[itemId] then 
-					itemId = didYouMean[itemId]
+				if itemAliases[itemId] then 
+					itemId = itemAliases[itemId]
 				end -- this is a quick and temporary solution, i plan to support crafting framework material
 				local item = tes3.getObject(itemId) ---@cast item tes3object|any
 				if not item then
