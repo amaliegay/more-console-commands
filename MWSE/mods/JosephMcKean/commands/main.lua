@@ -5,8 +5,6 @@ local config = mod.config
 local log = mod:log("main")
 log:info("initializing")
 
-local didYouMean = require("JosephmcKean.commands.didYouMean")
-
 local data
 
 local modName = "More Console Commands"
@@ -77,11 +75,7 @@ local function parseArgs(fn, args)
 			if argument.index == 1 and argument.containsSpaces then args = { table.concat(args, " ") } end
 			metavars = metavars .. argument.metavar .. " "
 			local arg = args[argument.index]
-			-- didYouMean error
-			if argument.didYouMean and didYouMean[arg] then
-				tes3ui.log("Did you mean: %s", didYouMean[arg])
-				return false
-			end
+			
 			-- missing args error
 			if argument.required and not arg then
 				errored = true

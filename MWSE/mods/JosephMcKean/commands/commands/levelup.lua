@@ -1,5 +1,5 @@
 local mod = require("JosephMcKean.commands")
-local registerCommands = require("JosephMcKean.commands.interop").registerCommands
+local registerCommand = require("JosephMcKean.commands.interop").registerCommand
 local log = mod:log("levelup")
 
 local skillModuleSkills = {
@@ -44,15 +44,13 @@ local function levelUp(name, value)
 end
 
 event.register("command:register", function()
-	registerCommands({
-		{
-			name = "levelup",
-			description = "Increase the player's skill by the input value. e.g. levelup bushcrafting 69, levelup survival 420",
-			arguments = {
-				{ index = 1, metavar = "skillname", required = true, choices = skillModuleSkillNames, help = "the name of the skill to level up" },
-				{ index = 2, metavar = "value", required = true, help = "the increase value" },
-			},
-			callback = function(argv) levelUp(argv[1], tonumber(argv[2]) or 0) end,
+	registerCommand({
+		name = "levelup",
+		description = "Increase the player's skill by the input value. e.g. levelup bushcrafting 69, levelup survival 420",
+		arguments = {
+			{ index = 1, metavar = "skillname", required = true, choices = skillModuleSkillNames, help = "the name of the skill to level up" },
+			{ index = 2, metavar = "value", required = true, help = "the increase value" },
 		},
+		callback = function(argv) levelUp(argv[1], tonumber(argv[2]) or 0) end,
 	})
 end)

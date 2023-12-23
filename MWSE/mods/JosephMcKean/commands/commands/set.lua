@@ -51,6 +51,7 @@ local function getName(name)
 		["heavyarmor"] = "heavyArmor",
 		["bluntweapon"] = "bluntWeapon",
 		["longblade"] = "longBlade",
+		["longsword"] = "longBlade", -- alias
 		["lightarmor"] = "lightArmor",
 		["shortblade"] = "shortBlade",
 		["handtohand"] = "handToHand",
@@ -65,7 +66,7 @@ event.register("command:register", function()
 			name = "set",
 			description = "Set the current reference's attribute or skill base value",
 			arguments = {
-				{ index = 1, metavar = "name", required = true, choices = names, help = "the name of the attribute or skill to set", didYouMean = true },
+				{ index = 1, metavar = "name", required = true, choices = names, help = "the name of the attribute or skill to set" },
 				{ index = 2, metavar = "value", required = true, help = "the value to set" },
 			},
 			callback = function(argv)
