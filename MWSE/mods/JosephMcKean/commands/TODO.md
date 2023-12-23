@@ -1,7 +1,3 @@
-- [ ] summon alias for spawn (minecraft)
-- [ ] did you mean: urshilaku, sutra burial (instead of urshilaku, suutra burial, added letter)
-- [ ] did you mean: sadrith mora, madeilde raran's house (instead of madelide, swapping letter)
-- [ ] did you mean: mournhold (instead of mourhold, missing letter)
 - [ ] fov command
 - [ ] lookup ilunibi not working because cell not object?
 - [ ] lookup beggar's nose not working because spellmaking not object?
