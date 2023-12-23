@@ -4,6 +4,7 @@ event.register("command:register", function()
 	registerCommand({
 		name = "resurrect",
 		description = "Resurrect the current reference and keep the inventory",
+		requiresInGame = true,
 		callback = function(argv)
 			local ref = tes3ui.getConsoleReference()
 			if ref and ref.mobile then

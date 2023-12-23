@@ -4,6 +4,7 @@ event.register("command:register", function()
 	registerCommand({
 		name = "paralyze",
 		description = "Paralyze or unparalyze the current reference",
+		requiresInGame = true,
 		callback = function(argv)
 			local ref = tes3ui.getConsoleReference()
 			if ref and ref.mobile then

@@ -17,6 +17,7 @@ event.register("command:register", function()
 	registerCommand({
 		name = "skills",
 		description = "Print the current reference's skills",
+		requiresInGame = true,
 		callback = function(argv)
 			local ref = tes3ui.getConsoleReference()
 			if not ref then

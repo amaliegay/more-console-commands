@@ -1,3 +1,4 @@
+local common = require("JosephMcKean.commands.common")
 local registerCommand = require("JosephMcKean.commands.interop").registerCommand
 
 local itemAliases = {
@@ -11,6 +12,7 @@ local itemAliases = {
 	["flint"] = "ashfall_flint",
 	["coal"] = "ashfall_ingred_coal_01",
 	["leather"] = "ashfall_leather",
+	["gold"] = "gold_001",
 }
 
 local canCarryObjectType = {
@@ -90,6 +92,7 @@ event.register("command:register", function()
 		aliases = { "add" },
 		description = "Add item(s) to the current reference's inventory",
 		arguments = { { index = 1, metavar = "id", required = true, help = "the id of the item to add" }, { index = 2, metavar = "count", required = false, help = "the add item count" } },
+		requiresInGame = true,
 		callback = function(argv)
 			local ref = tes3ui.getConsoleReference() or tes3.player
 			if not ref then return end
@@ -99,7 +102,7 @@ event.register("command:register", function()
 			end
 			local count = tonumber(argv[#argv])
 			if count then table.remove(argv, #argv) end
-			local itemId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
+			local itemId = common.concat(argv)
 			if not itemId then return end
 			addItem(ref, itemId, count)
 		end,
@@ -109,6 +112,7 @@ event.register("command:register", function()
 		aliases = { "copy" },
 		description = "Duplicate the item that is the current reference to the player's inventory",
 		arguments = { { index = 1, metavar = "count", required = false, help = "the count of the item to duplicate" } },
+		requiresInGame = true,
 		callback = function(argv) dupe(tonumber(argv[1])) end,
 	})
 	for alias, itemId in pairs(itemAliases) do
@@ -116,6 +120,7 @@ event.register("command:register", function()
 			name = alias,
 			hidden = true,
 			arguments = { { index = 1, metavar = "count", required = true, help = "the count of the item to add" } },
+			requiresInGame = true,
 			callback = function(argv) addItem(tes3.player, itemId, tonumber(argv[1])) end,
 		})
 	end

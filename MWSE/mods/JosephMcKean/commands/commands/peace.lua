@@ -16,6 +16,7 @@ event.register("command:register", function()
 	registerCommand({
 		name = "peace",
 		description = "Pacify all enemies. Irreversible",
+		requiresInGame = true,
 		callback = function(argv)
 			calm()
 			if not event.isRegistered("cellChanged", calm) then event.register("cellChanged", calm) end

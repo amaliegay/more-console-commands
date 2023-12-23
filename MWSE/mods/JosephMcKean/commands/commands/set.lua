@@ -69,6 +69,7 @@ event.register("command:register", function()
 				{ index = 1, metavar = "name", required = true, choices = names, help = "the name of the attribute or skill to set" },
 				{ index = 2, metavar = "value", required = true, help = "the value to set" },
 			},
+			requiresInGame = true,
 			callback = function(argv)
 				local ref = tes3ui.getConsoleReference() or tes3.player
 				if not ref then return end
@@ -87,6 +88,7 @@ event.register("command:register", function()
 			name = "max",
 			description = "Set the current reference's all attributes and skills base value to the input value",
 			arguments = { { index = 1, metavar = "value", required = false, help = "the value to set" } },
+			requiresInGame = true,
 			callback = function(argv)
 				local ref = tes3ui.getConsoleReference() or tes3.player
 				if not ref then return end

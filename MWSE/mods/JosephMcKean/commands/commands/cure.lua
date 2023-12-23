@@ -4,6 +4,7 @@ event.register("command:register", function()
 	registerCommand({
 		name = "cure",
 		description = "Cure current reference of disease, blight, poison, and restore attributes and skills",
+		requiresInGame = true,
 		callback = function(argv)
 			local ref = tes3ui.getConsoleReference() or tes3.player ---@type tes3reference
 			if not ref.mobile then

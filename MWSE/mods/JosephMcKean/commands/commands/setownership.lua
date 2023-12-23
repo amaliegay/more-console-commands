@@ -5,6 +5,7 @@ event.register("command:register", function()
 		name = "setownership",
 		description = "Set ownership of the current reference to none, or the specified NPC or faction with specified base ID",
 		arguments = { { index = 1, containsSpaces = true, metavar = "id", required = false, help = "the base id of the npc or faction to set ownership" } },
+		requiresInGame = true,
 		callback = function(argv)
 			local ref = tes3ui.getConsoleReference()
 			if not ref then return end

@@ -1,5 +1,6 @@
 local utils = include("JosephMcKean.lib.utils")
 
+local common = require("JosephMcKean.commands.common")
 local registerCommand = require("JosephMcKean.commands.interop").registerCommand
 local mod = require("JosephMcKean.commands")
 local log = mod:log("coc")
@@ -42,13 +43,10 @@ event.register("command:register", function()
 		name = "coc",
 		description = "Teleport the player to a cell with specified id or specified grid x and grid y",
 		arguments = { { index = 1, metavar = "id", required = false, help = "the id of the cell to teleport to" } },
+		requiresInGame = true,
 		callback = function(argv)
-			if not tes3.player then
-				tes3ui.log("Please load a save first.")
-				return
-			end
 			local cell2coc ---@type tes3cell
-			local cellId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
+			local cellId = common.concat(argv)
 			log:debug("coc %s", cellId)
 			if not cellId then
 				tes3ui.log("cellId not found")

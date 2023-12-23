@@ -1,3 +1,4 @@
+local common = require("JosephMcKean.commands.common")
 local registerCommand = require("JosephMcKean.commands.interop").registerCommand
 
 local aliases = {
@@ -24,10 +25,11 @@ event.register("command:register", function()
 			{ index = 1, metavar = "faction-id", required = true, help = "the id of the faction you wish to join" },
 			{ index = 2, metavar = "rank", required = false, help = "the rank in the faction" },
 		},
+		requiresInGame = true,
 		callback = function(argv)
 			local rank = tonumber(argv[#argv])
 			if rank then table.remove(argv, #argv) end
-			local factionId = argv and not table.empty(argv) and table.concat(argv, " ") or nil
+			local factionId = common.concat(argv)
 			local faction = factionId and tes3.getFaction(factionId)
 			if not faction then
 				tes3ui.log("join: error: factionId %s not found", factionId)

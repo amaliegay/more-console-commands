@@ -17,6 +17,7 @@ event.register("command:register", function()
 		name = "emptyinventory",
 		description = "Empty the current reference's inventory",
 		arguments = { { index = 1, metavar = "player", required = false, help = "specified to empty player inventory" } },
+		requiresInGame = true,
 		callback = function(argv)
 			if argv[1] == "player" then
 				removeItems(tes3.player)

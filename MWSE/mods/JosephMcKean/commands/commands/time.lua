@@ -6,7 +6,8 @@ event.register("command:register", function()
 	registerCommand({
 		name = "time",
 		description = "Set current ingame time",
-		arguments = { { index = 1, metavar = "time", required = true, help = "the time to set, e.g. 18:23 or day/night/noon/midnight/sunrise/sunset" } },
+		arguments = { { index = 1, metavar = "hour", required = true, help = "the time to set, e.g. 18:23 or day/night/noon/midnight/sunrise/sunset" } },
+		requiresInGame = true,
 		callback = function(argv)
 			local time = hours[argv[1]] or argv[1]
 			local hourStr, minuteStr = table.unpack(time:split(":"))

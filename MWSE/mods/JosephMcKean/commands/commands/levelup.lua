@@ -51,6 +51,7 @@ event.register("command:register", function()
 			{ index = 1, metavar = "skillname", required = true, choices = skillModuleSkillNames, help = "the name of the skill to level up" },
 			{ index = 2, metavar = "value", required = true, help = "the increase value" },
 		},
+		requiresInGame = true,
 		callback = function(argv) levelUp(argv[1], tonumber(argv[2]) or 0) end,
 	})
 end)

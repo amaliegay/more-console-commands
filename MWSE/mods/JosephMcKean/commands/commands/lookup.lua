@@ -1,3 +1,4 @@
+local common = require("JosephMcKean.commands.common")
 local registerCommand = require("JosephMcKean.commands.interop").registerCommand
 local mod = require("JosephMcKean.commands")
 local log = mod:log("lookup")
@@ -30,7 +31,7 @@ event.register("command:register", function()
 				log:trace("%s is objectType", argv[#argv])
 				table.remove(argv, #argv)
 			end
-			local name = argv and not table.empty(argv) and table.concat(argv, " ") or nil
+			local name = common.concat(argv)
 			if not isCellType and not objectType and not name then return end
 			local lookUpObjs = {}
 			if objectType then

@@ -1,3 +1,4 @@
+local common = require("JosephMcKean.commands.common")
 local registerCommand = require("JosephMcKean.commands.interop").registerCommand
 
 event.register("command:register", function()
@@ -6,8 +7,9 @@ event.register("command:register", function()
 		description = "Spawn a reference with the specified id",
 		aliases = { "summon" },
 		arguments = { { index = 1, metavar = "id", required = true, help = "the id of the reference to spawn" } },
+		requiresInGame = true,
 		callback = function(argv)
-			local id = argv and not table.empty(argv) and table.concat(argv, " ") or nil
+			local id = common.concat(argv)
 			if not id then return end
 			local obj = tes3.getObject(id)
 			if not obj then

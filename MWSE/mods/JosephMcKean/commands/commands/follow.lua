@@ -4,6 +4,7 @@ event.register("command:register", function()
 	registerCommand({
 		name = "follow",
 		description = "Make the current reference your follower",
+		requiresInGame = true,
 		callback = function(argv)
 			local ref = tes3ui.getConsoleReference()
 			if not ref then return end

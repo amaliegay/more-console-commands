@@ -15,6 +15,7 @@ event.register("command:register", function()
 			name = "kill",
 			description = "Kill the current reference. For safety reason, type kill player to kill the player",
 			arguments = { { index = 1, metavar = "player", required = false, help = "specified to kill player" } },
+			requiresInGame = true,
 			callback = function(argv)
 				local ref = tes3ui.getConsoleReference()
 				if not argv[1] and ref and ref.mobile then
@@ -31,6 +32,6 @@ event.register("command:register", function()
 				end
 			end,
 		},
-		{ name = "killall", description = "Kills all non-essential NPCs and creatures within the cell the player is currently in", callback = function(argv) killAll() end },
+		{ name = "killall", description = "Kills all non-essential NPCs and creatures within the cell the player is currently in", requiresInGame = true, callback = function(argv) killAll() end },
 	})
 end)

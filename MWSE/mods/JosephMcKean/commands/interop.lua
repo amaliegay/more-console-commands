@@ -1,13 +1,13 @@
 ---@class command.interop
 local interop = {}
 
-interop.data = require("JosephMcKean.commands.data")
+local common = require("JosephMcKean.commands.common")
 
 ---@param commandsData command.data[]
 function interop.registerCommands(commandsData) for _, command in ipairs(commandsData) do interop.registerCommand(command) end end
 
 ---@param command command.data
-function interop.registerCommand(command) interop.data.new(command) end
+function interop.registerCommand(command) common.registerCommand(command) end
 
 ---@param command string
 function interop.run(command)
@@ -16,7 +16,7 @@ function interop.run(command)
 end
 
 ---@return table<string, command> commands
-function interop.getCommands() return interop.data.commands end
+function interop.getCommands() return common.commands end
 
 return interop
 

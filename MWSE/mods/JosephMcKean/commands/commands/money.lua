@@ -28,12 +28,13 @@ end
 
 event.register("command:register", function()
 	registerCommands({
-		{ name = "kaching", description = "Give current reference 1,000 gold", argPattern = "", callback = function() giveGold(1000) end },
-		{ name = "motherlode", description = "Give current reference 50,000 gold", argPattern = "", callback = function() giveGold(50000) end },
+		{ name = "kaching", description = "Give current reference 1,000 gold", requiresInGame = true, callback = function() giveGold(1000) end },
+		{ name = "motherlode", description = "Give current reference 50,000 gold", requiresInGame = true, callback = function() giveGold(50000) end },
 		{
 			name = "money",
 			description = "Set current reference gold amount to the input value. e.g. money 420",
 			arguments = { { index = 1, metavar = "goldcount", required = true, help = "the amount of gold to add" } },
+			requiresInGame = true,
 			callback = function(argv)
 				local ref = tes3ui.getConsoleReference() or tes3.player ---@type tes3reference
 				if not ref then return end

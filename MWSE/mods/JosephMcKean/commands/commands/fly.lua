@@ -4,6 +4,7 @@ event.register("command:register", function()
 	registerCommand({
 		name = "fly",
 		description = "Toggle levitate",
+		requiresInGame = true,
 		callback = function(argv)
 			tes3.mobilePlayer.isFlying = not tes3.mobilePlayer.isFlying
 			tes3ui.log("Levitate -> %s", tes3.mobilePlayer.isFlying and "On" or "Off")

@@ -4,6 +4,7 @@ event.register("command:register", function()
 	registerCommand({
 		name = "unlock",
 		description = "Unlock lock",
+		requiresInGame = true,
 		callback = function(argv)
 			local ref = tes3ui.getConsoleReference()
 			if not ref then return end

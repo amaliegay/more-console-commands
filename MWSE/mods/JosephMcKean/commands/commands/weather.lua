@@ -7,7 +7,8 @@ event.register("command:register", function()
 		name = "weather",
 		description = "Set current weather",
 		aliases = { "forceweather", "fw" },
-		arguments = { { index = 1, metavar = "weather", required = true, choices = weathers, help = "the name of the weather" } },
+		arguments = { { index = 1, metavar = "name", required = true, choices = weathers, help = "the name of the weather" } },
+		requiresInGame = true,
 		callback = function(argv)
 			local weatherController = tes3.worldController.weatherController
 			local weather = tes3.weather[argv[1]] ---@type number?
